@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Animateur · Atelier IA NéoPix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 80px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 20px;overflow-x:auto}
+.tabs button{border:0;background:transparent;color:var(--muted);font:600 14px var(--font-body);padding:12px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
+.toolbar select{width:auto;min-width:220px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.stat .v{font:700 26px var(--font-display);line-height:1.1}
+.stat .l{font-size:12.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--line);margin-right:6px}
+.dot.on{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+.minibar{display:flex;gap:3px}
+.minibar i{width:16px;height:8px;border-radius:2px;background:var(--line)}
+.minibar i.d{background:var(--ok)}
+.minibar i.c{background:var(--accent)}
+.detail{background:var(--surface-2);font-size:13.5px}
+.detail dl{display:grid;grid-template-columns:minmax(160px,260px) 1fr;gap:6px 14px;margin:0}
+.detail dt{color:var(--muted)}
+.detail dd{margin:0;white-space:pre-wrap}
+.tablewrap{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px}
+.modlist{list-style:none;margin:0;padding:8px}
+.modlist li{display:flex;align-items:center;gap:6px;padding:4px}
+.modlist li button.pick{flex:1;text-align:left;border:0;background:transparent;font:inherit;color:var(--ink);padding:8px 10px;border-radius:8px;cursor:pointer}
+.modlist li button.pick[aria-current="true"]{background:var(--accent-soft);font-weight:600}
+.editor{padding:18px}
+.editor .two{display:grid;grid-template-columns:1fr 160px;gap:12px}
+.field>.mediarow{display:flex;gap:8px;align-items:center;margin:0}
+.mediarow input{flex:1}
+.promptItem{display:flex;gap:8px;margin:0 0 8px}
+.promptItem textarea{min-height:70px}
+.help{font-size:12.5px;color:var(--muted);margin:-8px 0 14px}
+.preview{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}
+.preview .module{padding:0;max-width:none}
+.chatpanel{height:560px;display:flex;flex-direction:column;position:static;border:1px solid var(--line);border-radius:var(--radius)}
+.sess{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+.sess:last-child{border-bottom:0}
+.linkbox{font-size:13px;word-break:break-all;color:var(--muted);grid-column:1/-1}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}.sess{grid-template-columns:1fr}.editor .two{grid-template-columns:1fr}.detail dl{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<section class="gate" id="gate" hidden>
+  <form class="card" id="keyForm" style="width:100%;max-width:420px;padding:28px 24px;border-radius:18px">
+    <div class="brand">Néo<b>Pix</b></div>
+    <h1 style="font-size:24px;margin:18px 0 6px">Espace animateur</h1>
+    <p class="muted" style="margin:0 0 20px">Atelier IA : suivi, chat et contenus.</p>
+    <label class="field"><span>Clé animateur</span><input type="password" id="key" autocomplete="current-password" required></label>
+    <button class="btn primary" type="submit" style="width:100%">Entrer</button>
+    <p class="err" id="keyErr" role="alert"></p>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="brand">Néo<b>Pix</b></div>
+    <div class="sp"><div class="session">Atelier IA · espace animateur</div></div>
+    <a class="btn sm" href="./" target="_blank" rel="noopener">Voir l'espace participant</a>
+    <button class="btn sm ghost" id="logout">Déconnexion</button>
+  </header>
+
+  <div class="wrap">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="suivi" aria-selected="true">Suivi en direct</button>
+      <button role="tab" data-tab="chat" aria-selected="false">Chat <span class="badge" id="unread" style="position:static;margin-left:4px" hidden></span></button>
+      <button role="tab" data-tab="contenu" aria-selected="false">Contenu</button>
+      <button role="tab" data-tab="sessions" aria-selected="false">Sessions et codes</button>
+    </div>
+
+    <div class="toolbar" id="sessionBar">
+      <label class="small muted" for="sessionSel">Session</label>
+      <select id="sessionSel"></select>
+      <span class="small muted" id="refreshInfo"></span>
+    </div>
+
+    <!-- Suivi -->
+    <section data-panel="suivi">
+      <div class="stats" id="stats"></div>
+      <div class="card tablewrap"><table>
+        <thead><tr><th>Participant</th><th>Avancée</th><th>Module en cours</th><th>Activité</th><th>Avis</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+    </section>
+
+    <!-- Chat -->
+    <section data-panel="chat" hidden>
+      <div class="chat chatpanel">
+        <div class="msgs" id="msgs"><p class="empty" id="msgsEmpty">Aucun message pour cette session.</p></div>
+        <form id="chatForm"><textarea id="chatInput" placeholder="Écrire à tous les participants…" maxlength="1000" aria-label="Message"></textarea>
+          <button class="btn primary" type="submit">Envoyer</button></form>
+      </div>
+    </section>
+
+    <!-- Contenu -->
+    <section data-panel="contenu" hidden>
+      <div class="grid2">
+        <div class="card">
+          <ul class="modlist" id="modList"></ul>
+          <div style="padding:0 12px 12px"><button class="btn sm" id="addMod" style="width:100%">+ Ajouter un module</button></div>
+        </div>
+        <form class="card editor" id="modForm">
+          <div class="two">
+            <label class="field"><span>Titre</span><input type="text" id="fTitle" maxlength="120" required></label>
+            <label class="field"><span>Durée</span><input type="text" id="fDuration" maxlength="20" placeholder="15 min"></label>
+          </div>
+          <label class="field"><span>Résumé (une phrase)</span><input type="text" id="fSummary" maxlength="240"></label>
+          <label class="field"><span>Présentation</span><textarea id="fBody" rows="12"></textarea></label>
+          <p class="help">Mise en forme : <code>## Titre</code>, <code>- liste</code>, <code>1. liste numérotée</code>, <code>&gt; encadré</code>, <code>**gras**</code>, <code>[[plan]]</code> pour les 3 champs du plan d'action.</p>
+          <label class="field"><span>Image (lien ou fichier)</span>
+            <span class="mediarow"><input type="url" id="fImage" placeholder="https://… ou laisser vide pour l'illustration par défaut">
+              <label class="btn sm">Importer<input type="file" accept="image/*" id="upImage" hidden></label></span></label>
+          <label class="field"><span>Vidéo (YouTube, Vimeo ou fichier)</span>
+            <span class="mediarow"><input type="url" id="fVideo" placeholder="https://www.youtube.com/watch?v=…">
+              <label class="btn sm">Importer<input type="file" accept="video/mp4,video/webm" id="upVideo" hidden></label></span></label>
+          <p class="help">Une vidéo remplace l'image en haut du module. Conseil : mettez vos vidéos sur YouTube en « non répertoriée », c'est gratuit et plus fluide. Import direct : 50 Mo maximum.</p>
+          <div class="field"><span style="display:block;font-weight:600;font-size:13.5px;margin-bottom:6px">Modèles de demandes à copier</span>
+            <div id="fPrompts"></div><button class="btn sm" type="button" id="addPrompt">+ Ajouter un modèle</button></div>
+          <label class="field"><span>Type</span><select id="fKind"><option value="lesson">Module classique</option><option value="feedback">Questionnaire de retour</option></select></label>
+          <div class="toolbar" style="margin:8px 0 0">
+            <button class="btn primary" type="submit" id="saveMod">Enregistrer</button>
+            <button class="btn danger" type="button" id="delMod">Supprimer le module</button>
+            <span class="small" id="modStatus"></span>
+          </div>
+          <div class="preview"><div class="eyebrow">Aperçu</div><div class="module" id="preview"></div></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Sessions -->
+    <section data-panel="sessions" hidden>
+      <div class="card" id="sessList"></div>
+      <h2 style="font-size:18px;margin:26px 0 10px">Nouvelle session</h2>
+      <form class="card" id="newSess" style="padding:16px;display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end">
+        <label class="field" style="margin:0"><span>Nom</span><input type="text" id="nsLabel" placeholder="Atelier du 4 décembre" required></label>
+        <label class="field" style="margin:0"><span>Code d'accès</span><input type="text" id="nsCode" placeholder="IA-DEC" required></label>
+        <button class="btn primary" type="submit">Créer</button>
+        <p class="err" id="nsErr" style="grid-column:1/-1;margin:0"></p>
+      </form>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY_STORE = "neopix_admin_key";
+  var A = { key: store(KEY_STORE) || "", data: null, session: store("neopix_atelier_session") || "", tab: "suivi",
+            open: {}, editId: null, lastMsg: 0, msgSession: null, unread: 0, timer: null };
+
+  function toast(t) { var el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2600); }
+  function participantURL(code) { return new URL("./?code=" + encodeURIComponent(code), location.href).href.replace("admin.html", ""); }
+
+  /* ---------- Connexion ---------- */
+  $("keyForm").addEventListener("submit", async function (e) {
+    e.preventDefault(); $("keyErr").textContent = "";
+    A.key = $("key").value.trim();
+    try { await load(); store(KEY_STORE, A.key); start(); } catch (err) { $("keyErr").textContent = err.message; }
+  });
+  $("logout").addEventListener("click", function () { store(KEY_STORE, null); location.reload(); });
+
+  async function load() {
+    A.data = await rpc("atelier_admin_overview", { p_key: A.key });
+    var ids = A.data.sessions.map(function (s) { return s.id; });
+    if (ids.indexOf(A.session) < 0) A.session = ids[0] || "";
+    $("refreshInfo").textContent = "Actualisé à " + new Date().toLocaleTimeString("fr-FR");
+  }
+  function start() {
+    $("gate").hidden = true; $("app").hidden = false;
+    renderAll(); pollChat();
+    clearInterval(A.timer);
+    A.timer = setInterval(async function () {
+      if (document.hidden) return;
+      try { await load(); if (A.tab === "suivi") renderSuivi(); renderSessionSel(); } catch (e) {}
+      pollChat();
+    }, 5000);
+  }
+
+  /* ---------- Onglets ---------- */
+  document.querySelectorAll("[data-tab]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      A.tab = b.dataset.tab;
+      document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
+      document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== A.tab; });
+      $("sessionBar").hidden = A.tab === "contenu" || A.tab === "sessions";
+      if (A.tab === "chat") { A.unread = 0; updateBadge(); var box = $("msgs"); box.scrollTop = box.scrollHeight; }
+      renderAll();
+    });
+  });
+
+  function curSession() { return (A.data.sessions || []).find(function (s) { return s.id === A.session; }); }
+  function renderAll() { renderSessionSel(); renderSuivi(); renderModList(); renderSessions(); }
+
+  function renderSessionSel() {
+    var sel = $("sessionSel"), html = A.data.sessions.map(function (s) {
+      return '<option value="' + s.id + '"' + (s.id === A.session ? " selected" : "") + '>' + esc(s.label) + " · code " + esc(s.code) + (s.active ? "" : " (fermée)") + "</option>";
+    }).join("");
+    if (sel.dataset.h !== html) { sel.innerHTML = html; sel.dataset.h = html; }
+  }
+  $("sessionSel").addEventListener("change", function () {
+    A.session = this.value; store("neopix_atelier_session", A.session);
+    A.lastMsg = 0; $("msgs").innerHTML = '<p class="empty" id="msgsEmpty">Aucun message pour cette session.</p>';
+    renderSuivi(); pollChat();
+  });
+
+  /* ---------- Suivi ---------- */
+  function online(p) { return Date.now() - new Date(p.last_seen).getTime() < 60000; }
+  function renderSuivi() {
+    var s = curSession(), mods = A.data.modules;
+    if (!s) { $("stats").innerHTML = ""; $("rows").innerHTML = '<tr><td colspan="6" class="muted">Créez d\'abord une session dans l\'onglet « Sessions et codes ».</td></tr>'; return; }
+    var ps = s.participants, n = ps.length;
+    var doneCount = function (p) { var d = (p.progress && p.progress.done) || {}; return mods.filter(function (m) { return d[m.id]; }).length; };
+    var fb = ps.filter(function (p) { return p.feedback && p.feedback.note; });
+    var avgNote = fb.length ? (fb.reduce(function (a, p) { return a + (+p.feedback.note || 0); }, 0) / fb.length).toFixed(1) : "–";
+    var pay = fb.filter(function (p) { return p.feedback.prix && p.feedback.prix !== "Rien"; }).length;
+    var suite = fb.filter(function (p) { return p.feedback.suite === "Oui, contactez-moi"; }).length;
+    var avgProg = n ? Math.round(ps.reduce(function (a, p) { return a + doneCount(p); }, 0) / n / (mods.length || 1) * 100) : 0;
+    $("stats").innerHTML = [
+      [n, "participants"], [ps.filter(online).length, "en ligne maintenant"], [avgProg + " %", "avancée moyenne"],
+      [fb.length + "/" + n, "avis reçus"], [avgNote, "note moyenne /10"],
+      [fb.length ? Math.round(pay / fb.length * 100) + " %" : "–", "prêts à payer"], [suite, "demandes de suite"]
+    ].map(function (x) { return '<div class="stat"><div class="v">' + x[0] + '</div><div class="l">' + x[1] + "</div></div>"; }).join("");
+
+    if (!n) { $("rows").innerHTML = '<tr><td colspan="6" class="muted">Personne n\'est encore connecté. Lien à partager : <strong>' + esc(participantURL(s.code)) + "</strong></td></tr>"; return; }
+    var rows = "";
+    ps.forEach(function (p) {
+      var d = (p.progress && p.progress.done) || {};
+      var cur = mods.find(function (m) { return m.id === p.current_module; });
+      var bar = mods.map(function (m) { return '<i class="' + (d[m.id] ? "d" : m.id === p.current_module ? "c" : "") + '" title="' + esc(m.title) + '"></i>'; }).join("");
+      rows += '<tr><td><strong>' + esc(p.name) + "</strong><br><span class=\"muted small\">" + esc(p.business || "—") + "</span></td>" +
+        '<td><div class="minibar">' + bar + '</div><span class="small muted">' + doneCount(p) + "/" + mods.length + "</span></td>" +
+        "<td>" + (cur ? esc(cur.title) : "—") + "</td>" +
+        '<td><span class="dot' + (online(p) ? " on" : "") + '"></span>' + (online(p) ? "En ligne" : timeAgo(p.last_seen)) + "</td>" +
+        "<td>" + (p.feedback && p.feedback.note ? "<strong>" + esc(p.feedback.note) + "/10</strong>" : '<span class="muted">—</span>') + "</td>" +
+        '<td><button class="btn sm" data-toggle="' + p.id + '">' + (A.open[p.id] ? "Masquer" : "Détails") + "</button></td></tr>";
+      if (A.open[p.id]) {
+        var plan = ((p.progress && p.progress.plan) || []).filter(Boolean);
+        var items = [["Plan d'action", plan.length ? plan.map(function (x, i) { return (i + 1) + ". " + x; }).join("\n") : "Pas encore rempli"],
+                     ["Connecté depuis", new Date(p.created_at).toLocaleString("fr-FR")]];
+        FEEDBACK_QUESTIONS.forEach(function (q) { if (p.feedback && p.feedback[q.id]) items.push([q.label, p.feedback[q.id]]); });
+        rows += '<tr class="detail"><td colspan="6"><dl>' + items.map(function (x) { return "<dt>" + esc(x[0]) + "</dt><dd>" + esc(x[1]) + "</dd>"; }).join("") + "</dl>" +
+          '<button class="btn sm danger" style="margin-top:12px" data-delp="' + p.id + '">Retirer ce participant</button></td></tr>';
+      }
+    });
+    $("rows").innerHTML = rows;
+  }
+  $("rows").addEventListener("click", async function (e) {
+    var t = e.target.closest("[data-toggle]"), d = e.target.closest("[data-delp]");
+    if (t) { A.open[t.dataset.toggle] = !A.open[t.dataset.toggle]; renderSuivi(); }
+    if (d && confirm("Retirer ce participant et ses réponses ? Cette action est définitive.")) {
+      try { await rpc("atelier_admin_participant_delete", { p_key: A.key, p_id: d.dataset.delp }); await load(); renderSuivi(); toast("Participant retiré."); } catch (err) { toast(err.message); }
+    }
+  });
+
+  /* ---------- Chat ---------- */
+  function updateBadge() { var b = $("unread"); b.hidden = !A.unread; b.textContent = A.unread; }
+  async function pollChat() {
+    if (!A.session) return;
+    var sid = A.session;
+    try {
+      var list = await rpc("atelier_chat", { p_token: null, p_key: A.key, p_session: sid, p_after: A.lastMsg });
+      if (sid !== A.session || !list.length) return;
+      var box = $("msgs"), first = A.lastMsg === 0;
+      $("msgsEmpty") && ($("msgsEmpty").hidden = true);
+      list.forEach(function (m) {
+        if (m.id <= A.lastMsg) return; A.lastMsg = m.id;
+        var el = document.createElement("div");
+        el.className = "msg" + (m.is_staff ? " mine" : "");
+        el.innerHTML = '<p class="who">' + (m.is_staff ? "Vous (animateur)" : esc(m.author)) + " · " + hhmm(m.created_at) + '</p><div class="bubble"></div>';
+        el.querySelector(".bubble").textContent = m.body; box.appendChild(el);
+        if (!first && !m.is_staff && A.tab !== "chat") A.unread++;
+      });
+      updateBadge(); box.scrollTop = box.scrollHeight;
+    } catch (e) {}
+  }
+  $("chatForm").addEventListener("submit", async function (e) {
+    e.preventDefault(); var t = $("chatInput").value.trim(); if (!t || !A.session) return;
+    $("chatInput").value = "";
+    try { await rpc("atelier_send", { p_token: null, p_key: A.key, p_session: A.session, p_body: t }); pollChat(); }
+    catch (err) { $("chatInput").value = t; toast(err.message); }
+  });
+  $("chatInput").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("chatForm").requestSubmit(); } });
+
+  /* ---------- Contenu ---------- */
+  function renderModList() {
+    var mods = A.data.modules;
+    if (!A.editId && mods[0]) { A.editId = mods[0].id; fillForm(mods[0]); }
+    $("modList").innerHTML = mods.map(function (m, i) {
+      return '<li><button class="pick" type="button" data-pick="' + esc(m.id) + '" aria-current="' + (m.id === A.editId) + '">' + (i + 1) + ". " + esc(m.title) + "</button>" +
+        '<button class="btn sm ghost" type="button" data-move="' + i + ':-1" aria-label="Monter"' + (i ? "" : " disabled") + ">↑</button>" +
+        '<button class="btn sm ghost" type="button" data-move="' + i + ':1" aria-label="Descendre"' + (i < mods.length - 1 ? "" : " disabled") + ">↓</button></li>";
+    }).join("");
+  }
+  $("modList").addEventListener("click", async function (e) {
+    var p = e.target.closest("[data-pick]"), mv = e.target.closest("[data-move]");
+    if (p) { var m = A.data.modules.find(function (x) { return x.id === p.dataset.pick; }); A.editId = m.id; fillForm(m); renderModList(); }
+    if (mv) {
+      var parts = mv.dataset.move.split(":"), i = +parts[0], j = i + (+parts[1]), mods = A.data.modules.slice();
+      var tmp = mods[i]; mods[i] = mods[j]; mods[j] = tmp;
+      try {
+        for (var k = 0; k < mods.length; k++) {
+          if (mods[k].position !== (k + 1) * 10) await rpc("atelier_admin_module", { p_key: A.key, p_module: Object.assign({}, mods[k], { position: (k + 1) * 10 }) });
+        }
+        await load(); renderModList();
+      } catch (err) { toast(err.message); }
+    }
+  });
+  $("addMod").addEventListener("click", function () {
+    A.editId = "";
+    fillForm({ id: "", title: "Nouveau module", duration: "10 min", summary: "", body: "## Titre de section\nVotre texte ici.", prompts: [], image_url: "", video_url: "", kind: "lesson",
+               position: ((A.data.modules.length + 1) * 10) });
+    renderModList(); $("fTitle").focus(); $("fTitle").select();
+  });
+
+  function promptRow(v) {
+    var d = document.createElement("div"); d.className = "promptItem";
+    d.innerHTML = '<textarea maxlength="2000" aria-label="Modèle de demande"></textarea><button class="btn sm ghost" type="button" aria-label="Supprimer ce modèle">✕</button>';
+    d.querySelector("textarea").value = v || "";
+    d.querySelector("button").onclick = function () { d.remove(); updatePreview(); };
+    d.querySelector("textarea").addEventListener("input", updatePreview);
+    $("fPrompts").appendChild(d);
+  }
+  $("addPrompt").addEventListener("click", function () { promptRow(""); });
+
+  var editing = null;
+  function fillForm(m) {
+    editing = m;
+    $("fTitle").value = m.title || ""; $("fDuration").value = m.duration || ""; $("fSummary").value = m.summary || "";
+    $("fBody").value = m.body || ""; $("fImage").value = m.image_url || ""; $("fVideo").value = m.video_url || ""; $("fKind").value = m.kind || "lesson";
+    $("fPrompts").innerHTML = ""; (m.prompts || []).forEach(promptRow);
+    $("delMod").hidden = !m.id; $("modStatus").textContent = "";
+    updatePreview();
+  }
+  function formModule() {
+    return { id: editing && editing.id || "", position: editing && editing.position || 100,
+      title: $("fTitle").value.trim(), duration: $("fDuration").value.trim(), summary: $("fSummary").value.trim(), body: $("fBody").value,
+      image_url: $("fImage").value.trim(), video_url: $("fVideo").value.trim(), kind: $("fKind").value,
+      prompts: Array.prototype.map.call($("fPrompts").querySelectorAll("textarea"), function (t) { return t.value.trim(); }).filter(Boolean) };
+  }
+  function updatePreview() {
+    var m = formModule(), idx = Math.max(0, A.data.modules.findIndex(function (x) { return x.id === m.id; }));
+    $("preview").innerHTML = '<h1 style="font-size:26px">' + esc(m.title) + "</h1>" + (m.summary ? '<p class="lead">' + esc(m.summary) + "</p>" : "") +
+      (m.video_url ? videoHTML(m.video_url) : m.image_url ? '<div class="media"><img src="' + esc(m.image_url) + '" alt=""></div>' : '<div class="media">' + defaultArt(idx) + "</div>") +
+      '<div class="body">' + renderBody(m.body).replace('<div data-slot="plan"></div>', '<div class="plan muted small">[Ici : les 3 champs du plan d\'action]</div>') + "</div>" +
+      (m.prompts.length ? '<section class="prompts"><h2>Modèles à copier</h2>' + m.prompts.map(function (p) { return '<div class="prompt"><p>' + esc(p) + "</p></div>"; }).join("") + "</section>" : "") +
+      (m.kind === "feedback" ? '<div class="plan muted small">[Ici : le questionnaire de retour en ' + FEEDBACK_QUESTIONS.length + " questions]</div>" : "");
+  }
+  ["fTitle", "fSummary", "fBody", "fImage", "fVideo", "fKind"].forEach(function (id) { $(id).addEventListener("input", function () { clearTimeout(updatePreview.t); updatePreview.t = setTimeout(updatePreview, 250); }); });
+
+  $("modForm").addEventListener("submit", async function (e) {
+    e.preventDefault(); $("saveMod").disabled = true; $("modStatus").textContent = "Enregistrement…";
+    try {
+      var id = await rpc("atelier_admin_module", { p_key: A.key, p_module: formModule() });
+      await load(); A.editId = id; fillForm(A.data.modules.find(function (m) { return m.id === id; })); renderModList();
+      $("modStatus").textContent = "Enregistré ✓ Les participants le voient au prochain changement de module.";
+    } catch (err) { $("modStatus").textContent = err.message; }
+    $("saveMod").disabled = false;
+  });
+  $("delMod").addEventListener("click", async function () {
+    if (!editing || !editing.id || !confirm("Supprimer définitivement le module « " + editing.title + " » ?")) return;
+    try { await rpc("atelier_admin_module_delete", { p_key: A.key, p_id: editing.id }); await load(); A.editId = null; renderModList(); toast("Module supprimé."); } catch (err) { toast(err.message); }
+  });
+
+  async function upload(file, field) {
+    if (file.size > 50 * 1024 * 1024) { toast("Fichier trop lourd (50 Mo maximum). Pour une vidéo, utilisez YouTube."); return; }
+    $("modStatus").textContent = "Import en cours…";
+    try {
+      var ticket = await rpc("atelier_admin_upload_ticket", { p_key: A.key });
+      var safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+/, "");
+      var path = ticket + "/" + Date.now() + "-" + safe;
+      var r = await fetch(SB_URL + "/storage/v1/object/" + MEDIA_BUCKET + "/" + path, { method: "POST",
+        headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": file.type, "x-upsert": "false" }, body: file });
+      if (!r.ok) throw new Error("Import refusé (" + r.status + "). Vérifiez le format : image ou vidéo MP4/WebM.");
+      $(field).value = SB_URL + "/storage/v1/object/public/" + MEDIA_BUCKET + "/" + path;
+      updatePreview(); $("modStatus").textContent = "Fichier importé. Pensez à enregistrer le module.";
+    } catch (err) { $("modStatus").textContent = err.message; }
+  }
+  $("upImage").addEventListener("change", function () { if (this.files[0]) upload(this.files[0], "fImage"); this.value = ""; });
+  $("upVideo").addEventListener("change", function () { if (this.files[0]) upload(this.files[0], "fVideo"); this.value = ""; });
+
+  /* ---------- Sessions ---------- */
+  function renderSessions() {
+    if (A.tab !== "sessions") return;
+    var list = A.data.sessions;
+    $("sessList").innerHTML = list.length ? list.map(function (s) {
+      return '<form class="sess" data-sid="' + s.id + '">' +
+        '<label class="field" style="margin:0"><span>Nom</span><input type="text" name="label" value="' + esc(s.label) + '"></label>' +
+        '<label class="field" style="margin:0"><span>Code d\'accès</span><input type="text" name="code" value="' + esc(s.code) + '"></label>' +
+        '<div class="toolbar" style="margin:0"><label class="small"><input type="checkbox" name="active"' + (s.active ? " checked" : "") + "> Ouverte</label>" +
+        '<button class="btn sm primary" type="submit">Enregistrer</button><button class="btn sm danger" type="button" data-dels="' + s.id + '">Supprimer</button></div>' +
+        '<div class="linkbox">Lien participant : <strong>' + esc(participantURL(s.code)) + '</strong> <button class="btn sm" type="button" data-copylink="' + esc(participantURL(s.code)) + '">Copier le lien</button> · ' +
+        s.participants.length + " participant(s)</div></form>";
+    }).join("") : '<p class="muted" style="padding:16px;margin:0">Aucune session.</p>';
+  }
+  $("sessList").addEventListener("submit", async function (e) {
+    e.preventDefault(); var f = e.target;
+    try {
+      await rpc("atelier_admin_session", { p_key: A.key, p_id: f.dataset.sid, p_label: f.label.value, p_code: f.code.value, p_active: f.active.checked });
+      await load(); renderAll(); toast("Session enregistrée.");
+    } catch (err) { toast(err.message); }
+  });
+  $("sessList").addEventListener("click", async function (e) {
+    var c = e.target.closest("[data-copylink]"), d = e.target.closest("[data-dels]");
+    if (c) navigator.clipboard.writeText(c.dataset.copylink).then(function () { toast("Lien copié."); });
+    if (d && confirm("Supprimer cette session, ses participants, leurs réponses et le chat ? Cette action est définitive.")) {
+      try { await rpc("atelier_admin_session_delete", { p_key: A.key, p_id: d.dataset.dels }); await load(); renderAll(); toast("Session supprimée."); } catch (err) { toast(err.message); }
+    }
+  });
+  $("newSess").addEventListener("submit", async function (e) {
+    e.preventDefault(); $("nsErr").textContent = "";
+    try {
+      A.session = await rpc("atelier_admin_session", { p_key: A.key, p_id: null, p_label: $("nsLabel").value, p_code: $("nsCode").value, p_active: true });
+      store("neopix_atelier_session", A.session); A.lastMsg = 0;
+      $("nsLabel").value = ""; $("nsCode").value = ""; await load(); renderAll(); toast("Session créée.");
+    } catch (err) { $("nsErr").textContent = err.message; }
+  });
+
+  /* ---------- Démarrage ---------- */
+  (async function () {
+    if (!A.key) { $("gate").hidden = false; return; }
+    try { await load(); start(); } catch (err) { $("gate").hidden = false; if (err.code !== "forbidden") $("keyErr").textContent = err.message; }
+  })();
+})();
+</script>
+</body>
+</html>

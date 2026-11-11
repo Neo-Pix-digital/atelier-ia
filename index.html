@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Atelier IA · NéoPix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Écran d'accès -->
+<section class="gate" id="gate" hidden>
+  <form class="card" id="joinForm" novalidate>
+    <div class="brand">Néo<b>Pix</b></div>
+    <h1>L'IA pour gagner 3 heures par semaine</h1>
+    <p class="lead">Entrez le code donné par l'animateur pour accéder à l'atelier.</p>
+    <label class="field"><span>Code d'accès</span><input type="text" id="code" autocomplete="off" autocapitalize="characters" required></label>
+    <label class="field"><span>Prénom et nom</span><input type="text" id="name" autocomplete="name" required maxlength="80"></label>
+    <label class="field"><span>Votre entreprise <span class="muted">(facultatif)</span></span><input type="text" id="business" autocomplete="organization" maxlength="120"></label>
+    <button class="btn primary" type="submit" id="joinBtn">Entrer dans l'atelier</button>
+    <p class="err" id="joinErr" role="alert"></p>
+  </form>
+</section>
+
+<!-- Chargement -->
+<section class="gate" id="loading"><p class="muted">Chargement de l'atelier…</p></section>
+
+<!-- Application -->
+<div id="app" hidden>
+  <header class="topbar">
+    <button class="iconbtn mobile-only" id="tocBtn" aria-label="Sommaire" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="brand">Néo<b>Pix</b></div>
+    <div class="sp"><div class="session" id="sessionLabel"></div></div>
+    <div class="prog" aria-live="polite"><div class="track"><div class="fill" id="progFill"></div></div><span id="progTxt"></span></div>
+    <button class="iconbtn" id="chatBtn" aria-label="Ouvrir le chat" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>
+      <span class="badge" id="unread" hidden></span>
+    </button>
+  </header>
+
+  <div class="layout" id="layout">
+    <nav class="toc" id="toc" aria-label="Sommaire">
+      <h2>Sommaire</h2>
+      <ol id="tocList"></ol>
+      <p class="small muted" style="margin:18px 10px 0">Connecté : <strong id="meName"></strong><br>
+        <button class="btn ghost sm" id="logout" style="padding-left:0;justify-content:flex-start;min-height:28px">Changer de participant</button></p>
+    </nav>
+
+    <main class="module" id="module" tabindex="-1"></main>
+
+    <aside class="chat" id="chat" hidden aria-label="Chat de l'atelier">
+      <header><h2>Chat de l'atelier</h2>
+        <button class="iconbtn" id="chatClose" aria-label="Fermer le chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </header>
+      <div class="msgs" id="msgs" aria-live="polite"><p class="empty" id="msgsEmpty">Posez vos questions ici. L'animateur et les autres participants les voient.</p></div>
+      <form id="chatForm">
+        <textarea id="chatInput" placeholder="Votre message…" maxlength="1000" aria-label="Votre message"></textarea>
+        <button class="btn primary" type="submit" aria-label="Envoyer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2-7z"/></svg></button>
+      </form>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  var TOKEN_KEY = "neopix_atelier_token";
+  var $ = function (id) { return document.getElementById(id); };
+  var S = { token: store(TOKEN_KEY), me: null, session: null, modules: [], progress: {}, current: null,
+            lastMsg: 0, chatOpen: false, unread: 0, pollTimer: null, saveTimer: null };
+
+  function toast(t) { var el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2600); }
+  function show(id) { ["gate", "loading", "app"].forEach(function (x) { $(x).hidden = x !== id; }); }
+
+  /* ---------- Accès ---------- */
+  var params = new URLSearchParams(location.search);
+  if (params.get("code")) $("code").value = params.get("code");
+
+  $("joinForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    $("joinErr").textContent = "";
+    var code = $("code").value.trim(), name = $("name").value.trim();
+    if (!code) { $("joinErr").textContent = "Entrez le code d'accès."; $("code").focus(); return; }
+    if (name.length < 2) { $("joinErr").textContent = "Entrez votre prénom et votre nom."; $("name").focus(); return; }
+    $("joinBtn").disabled = true; $("joinBtn").textContent = "Connexion…";
+    try {
+      var r = await rpc("atelier_join", { p_code: code, p_name: name, p_business: $("business").value.trim() });
+      S.token = r.token; store(TOKEN_KEY, r.token);
+      if (params.get("code")) history.replaceState(null, "", location.pathname);
+      await boot();
+    } catch (err) { $("joinErr").textContent = err.message; }
+    $("joinBtn").disabled = false; $("joinBtn").textContent = "Entrer dans l'atelier";
+  });
+
+  $("logout").addEventListener("click", function () {
+    if (!confirm("Quitter cet accès ? Votre avancée reste enregistrée, mais il faudra le code pour revenir avec un nouveau profil.")) return;
+    store(TOKEN_KEY, null); location.reload();
+  });
+
+  async function boot() {
+    if (!S.token) { show("gate"); return; }
+    show("loading");
+    try {
+      var d = await rpc("atelier_me", { p_token: S.token });
+      S.me = d.participant; S.session = d.session; S.modules = d.modules || [];
+      S.progress = S.me.progress && typeof S.me.progress === "object" ? S.me.progress : {};
+      if (!S.progress.done) S.progress.done = {};
+      if (!S.progress.plan) S.progress.plan = ["", "", ""];
+      $("sessionLabel").textContent = S.session.label;
+      $("meName").textContent = S.me.name;
+      show("app");
+      var start = S.modules.find(function (m) { return m.id === S.me.current_module; }) || S.modules[0];
+      renderToc(); if (start) openModule(start.id, true);
+      startPolling();
+    } catch (err) {
+      if (err.code === "acces_refuse" || err.code === "session_fermee") { store(TOKEN_KEY, null); S.token = null; show("gate"); $("joinErr").textContent = err.message; }
+      else { $("loading").innerHTML = '<div class="card" style="max-width:420px"><p>' + esc(err.message) + '</p><button class="btn primary" onclick="location.reload()">Réessayer</button></div>'; }
+    }
+  }
+
+  /* ---------- Sommaire et progression ---------- */
+  function lessonModules() { return S.modules; }
+  function isDone(id) { return !!(S.progress.done && S.progress.done[id]); }
+  function renderToc() {
+    var list = $("tocList"); list.innerHTML = "";
+    lessonModules().forEach(function (m, i) {
+      var li = document.createElement("li");
+      li.innerHTML = '<button type="button" data-id="' + esc(m.id) + '" data-done="' + (isDone(m.id) ? 1 : 0) + '" aria-current="' + (m.id === S.current) + '">' +
+        '<span class="num">' + (isDone(m.id) ? "✓" : (i + 1)) + '</span><span><span class="t">' + esc(m.title) + '</span><br><span class="d">' + esc(m.duration) + '</span></span></button>';
+      li.firstChild.addEventListener("click", function () { openModule(m.id); closeToc(); });
+      list.appendChild(li);
+    });
+    var total = S.modules.length, done = S.modules.filter(function (m) { return isDone(m.id); }).length;
+    $("progFill").style.width = (total ? Math.round(done / total * 100) : 0) + "%";
+    $("progTxt").textContent = done + "/" + total;
+  }
+
+  function scheduleSave() {
+    clearTimeout(S.saveTimer);
+    S.saveTimer = setTimeout(saveNow, 700);
+  }
+  async function saveNow() {
+    clearTimeout(S.saveTimer);
+    try { await rpc("atelier_save", { p_token: S.token, p_progress: S.progress, p_current: S.current }); return true; }
+    catch (err) { toast(err.message); return false; }
+  }
+
+  /* ---------- Module ---------- */
+  function openModule(id, initial) {
+    var idx = S.modules.findIndex(function (m) { return m.id === id; });
+    if (idx < 0) return;
+    var m = S.modules[idx];
+    S.current = id;
+    var media = m.image_url ? '<figure class="media" style="margin:0 0 22px"><img src="' + esc(m.image_url) + '" alt=""></figure>'
+                            : '<div class="media">' + defaultArt(idx) + '</div>';
+    var html = '<div class="eyebrow">Module ' + (idx + 1) + (m.duration ? " · " + esc(m.duration) : "") + '</div>' +
+      '<h1>' + esc(m.title) + '</h1>' + (m.summary ? '<p class="lead">' + esc(m.summary) + '</p>' : "") +
+      (m.video_url ? videoHTML(m.video_url) : media) +
+      '<div class="body">' + renderBody(m.body) + '</div>';
+    if (m.prompts && m.prompts.length) {
+      html += '<section class="prompts"><h2>Modèles à copier</h2>' + m.prompts.map(function (p, i) {
+        return '<div class="prompt"><p>' + esc(p) + '</p><div class="row"><span>Remplacez les [crochets] par votre situation</span>' +
+          '<button class="btn sm" type="button" data-copy="' + i + '">Copier</button></div></div>';
+      }).join("") + '</section>';
+    }
+    if (m.kind === "feedback") html += feedbackHTML();
+    var prev = S.modules[idx - 1], next = S.modules[idx + 1];
+    html += '<div class="navrow">' + (prev ? '<button class="btn" type="button" id="prevBtn">← ' + esc(prev.title) + '</button>' : "<span></span>") +
+      (m.kind === "feedback" ? "" : isDone(m.id) && next ? '<button class="btn primary" type="button" id="nextBtn">Module suivant →</button>' :
+        isDone(m.id) ? '<span class="donetag">✓ Module terminé</span>' :
+        '<button class="btn primary" type="button" id="doneBtn">' + (next ? "J'ai terminé, module suivant →" : "J'ai terminé ce module") + '</button>') + '</div>';
+    var main = $("module"); main.innerHTML = html;
+
+    main.querySelectorAll("[data-copy]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var t = m.prompts[+b.dataset.copy];
+        (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () {
+          b.textContent = "Copié ✓"; setTimeout(function () { b.textContent = "Copier"; }, 1800);
+        }, function () { toast("Copie impossible : sélectionnez le texte à la main."); });
+      });
+    });
+    var slot = main.querySelector('[data-slot="plan"]'); if (slot) renderPlan(slot);
+    if (m.kind === "feedback") bindFeedback();
+    if ($("prevBtn")) $("prevBtn").onclick = function () { openModule(prev.id); };
+    if ($("nextBtn")) $("nextBtn").onclick = function () { openModule(next.id); };
+    if ($("doneBtn")) $("doneBtn").onclick = function () {
+      S.progress.done[m.id] = new Date().toISOString();
+      if (next) openModule(next.id); else { renderToc(); openModule(m.id); }
+      toast("Bravo, module terminé !");
+    };
+    renderToc();
+    if (!initial) { scheduleSave(); window.scrollTo(0, 0); main.focus({ preventScroll: true }); }
+  }
+
+  function renderPlan(slot) {
+    var labels = ["Usage n°1", "Usage n°2", "Usage n°3"];
+    slot.className = "plan";
+    slot.innerHTML = labels.map(function (l, i) {
+      return '<label class="field"><span>' + l + '</span><input type="text" data-plan="' + i + '" maxlength="200" placeholder="Ex. : répondre aux avis Google avec l\'IA" value="' + esc(S.progress.plan[i] || "") + '"></label>';
+    }).join("") + '<span class="saved" id="planSaved" hidden>Enregistré ✓</span>';
+    slot.querySelectorAll("[data-plan]").forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        S.progress.plan[+inp.dataset.plan] = inp.value;
+        clearTimeout(renderPlan.t);
+        renderPlan.t = setTimeout(async function () { if (await saveNow()) { $("planSaved").hidden = false; setTimeout(function () { var el = $("planSaved"); if (el) el.hidden = true; }, 1500); } }, 800);
+      });
+    });
+  }
+
+  /* ---------- Questionnaire ---------- */
+  function feedbackHTML() {
+    var sent = S.me.feedback;
+    if (sent && sent.sent_at) return '<div class="plan"><p class="donetag">✓ Merci, votre avis a bien été envoyé.</p><p class="muted small" style="margin:6px 0 0">Vous pouvez le modifier et le renvoyer si besoin.</p></div>' + formHTML(sent);
+    return formHTML({});
+  }
+  function formHTML(v) {
+    return '<form class="plan" id="fbForm" style="margin-top:16px">' + FEEDBACK_QUESTIONS.map(function (q) {
+      var val = v[q.id] || "";
+      if (q.type === "scale") {
+        var opts = ""; for (var i = 1; i <= 10; i++) opts += '<label><input type="radio" name="' + q.id + '" value="' + i + '"' + (String(val) === String(i) ? " checked" : "") + '>' + i + '</label>';
+        return '<fieldset class="field" style="border:0;padding:0;margin:0 0 16px"><legend style="font-weight:600;font-size:13.5px;margin-bottom:8px">' + esc(q.label) + '</legend><div class="choices scale">' + opts + '</div></fieldset>';
+      }
+      if (q.type === "choice") {
+        return '<fieldset class="field" style="border:0;padding:0;margin:0 0 16px"><legend style="font-weight:600;font-size:13.5px;margin-bottom:8px">' + esc(q.label) + '</legend><div class="choices">' +
+          q.options.map(function (o) { return '<label><input type="radio" name="' + q.id + '" value="' + esc(o) + '"' + (val === o ? " checked" : "") + '>' + esc(o) + '</label>'; }).join("") + '</div></fieldset>';
+      }
+      if (q.type === "text") return '<label class="field"><span>' + esc(q.label) + '</span><textarea name="' + q.id + '" maxlength="1000">' + esc(val) + '</textarea></label>';
+      return '<label class="field"><span>' + esc(q.label) + '</span><input type="text" name="' + q.id + '" maxlength="200" value="' + esc(val) + '"></label>';
+    }).join("") + '<button class="btn primary" type="submit" id="fbBtn">Envoyer mon avis</button><p class="err" id="fbErr"></p></form>';
+  }
+  function bindFeedback() {
+    var f = $("fbForm"); if (!f) return;
+    f.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var fd = new FormData(f), ans = {};
+      FEEDBACK_QUESTIONS.forEach(function (q) { var v = fd.get(q.id); if (v) ans[q.id] = String(v).trim(); });
+      if (!ans.note) { $("fbErr").textContent = "Donnez au moins une note de 1 à 10."; return; }
+      $("fbBtn").disabled = true;
+      try {
+        await rpc("atelier_feedback", { p_token: S.token, p_answers: ans });
+        S.me.feedback = Object.assign({}, ans, { sent_at: new Date().toISOString() });
+        S.progress.done[S.current] = new Date().toISOString();
+        await saveNow();
+        openModule(S.current); toast("Merci pour votre avis !");
+      } catch (err) { $("fbErr").textContent = err.message; $("fbBtn").disabled = false; }
+    });
+  }
+
+  /* ---------- Chat ---------- */
+  function setChat(open) {
+    S.chatOpen = open;
+    $("chat").hidden = !open;
+    $("layout").classList.toggle("with-chat", open);
+    $("chatBtn").setAttribute("aria-expanded", open);
+    if (open) { S.unread = 0; updateBadge(); var box = $("msgs"); box.scrollTop = box.scrollHeight; $("chatInput").focus(); pollChat(); }
+  }
+  $("chatBtn").addEventListener("click", function () { setChat(!S.chatOpen); });
+  $("chatClose").addEventListener("click", function () { setChat(false); });
+  function updateBadge() { var b = $("unread"); b.hidden = !S.unread; b.textContent = S.unread > 9 ? "9+" : S.unread; }
+
+  function addMessages(list) {
+    if (!list || !list.length) return;
+    var box = $("msgs"), atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+    $("msgsEmpty").hidden = true;
+    list.forEach(function (m) {
+      if (m.id <= S.lastMsg) return;
+      S.lastMsg = m.id;
+      var el = document.createElement("div");
+      el.className = "msg" + (m.mine ? " mine" : "") + (m.is_staff ? " staff" : "");
+      el.innerHTML = '<p class="who">' + (m.mine ? "Vous" : esc(m.author)) + " · " + hhmm(m.created_at) + '</p><div class="bubble"></div>';
+      el.querySelector(".bubble").textContent = m.body;
+      box.appendChild(el);
+      if (!m.mine && !S.chatOpen && S.lastMsgSeeded) S.unread++;
+    });
+    S.lastMsgSeeded = true;
+    updateBadge();
+    if (atBottom || S.chatOpen) box.scrollTop = box.scrollHeight;
+  }
+  async function pollChat() {
+    try { addMessages(await rpc("atelier_chat", { p_token: S.token, p_key: null, p_session: null, p_after: S.lastMsg })); } catch (e) { /* silencieux : on réessaie au prochain tour */ }
+  }
+  function startPolling() {
+    pollChat();
+    clearInterval(S.pollTimer);
+    S.pollTimer = setInterval(function () { if (!document.hidden || S.chatOpen) pollChat(); }, 4000);
+  }
+  $("chatForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var t = $("chatInput").value.trim(); if (!t) return;
+    $("chatInput").value = "";
+    try { await rpc("atelier_send", { p_token: S.token, p_key: null, p_session: null, p_body: t }); await pollChat(); }
+    catch (err) { $("chatInput").value = t; toast(err.message); }
+  });
+  $("chatInput").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("chatForm").requestSubmit(); } });
+
+  /* ---------- Sommaire mobile ---------- */
+  function closeToc() { $("toc").classList.remove("open"); $("tocBtn").setAttribute("aria-expanded", "false"); }
+  $("tocBtn").addEventListener("click", function () { var o = $("toc").classList.toggle("open"); $("tocBtn").setAttribute("aria-expanded", o); });
+  window.addEventListener("pagehide", function () { if (S.saveTimer) saveNow(); });
+
+  boot();
+})();
+</script>
+</body>
+</html>
