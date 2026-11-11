@@ -1,10 +1,11 @@
 # Atelier IA · NéoPix
 
-Plateforme web de l'atelier « L'IA pour gagner 3 heures par semaine ». Version 1.1.
+Plateforme web de l'atelier « L'IA pour gagner 3 heures par semaine ». Version 1.2 · NéoPix digital.
 
-- `index.html` : espace participant (code d'accès, sommaire, modules, chat, questionnaire, vos données)
-- `admin.html` : espace animateur (suivi en direct, chat, contenu, sessions et codes, réglages et vérification)
-- `shared.js`, `style.css`, `fonts/` : fichiers communs (polices hébergées ici, sans appel à Google)
+- `index.html` + `app.js` : espace participant (code d'accès, sommaire, modules, demande d'aide, chat, questionnaire, vos données)
+- `admin.html` + `admin.js` : espace animateur (tableau de bord en direct, module affiché à tous, alertes d'aide, chat, contenu, sessions et codes, réglages et vérification)
+- `shared.js`, `theme.js`, `style.css`, `fonts/` : fichiers communs (thème clair/sombre, polices hébergées ici, sans appel à Google)
+- Couleur principale : variables `--accent` et `--accent-soft` en haut de `style.css`
 - `supabase/` : structure de la base de données (déjà installée, pour archive)
 
 Adresses :

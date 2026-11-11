@@ -4,104 +4,269 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>Animateur · Atelier IA NéoPix</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; media-src 'self' https: blob:; connect-src 'self' https://kpkvskuxvrscfhlckxls.supabase.co; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="theme-color" content="#4f46e5">
+<title>Animateur · Atelier IA · NéoPix digital</title>
+<script src="theme.js"></script>
 <link rel="stylesheet" href="style.css">
 <style>
-.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 80px}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 20px;overflow-x:auto}
-.tabs button{border:0;background:transparent;color:var(--muted);font:600 14px var(--font-body);padding:12px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
-.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
-.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
-.toolbar select{width:auto;min-width:220px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 18px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
-.stat .v{font:700 26px var(--font-display);line-height:1.1}
-.stat .l{font-size:12.5px;color:var(--muted)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line)}
-td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-tr:last-child td{border-bottom:0}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--line);margin-right:6px}
-.dot.on{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
-.minibar{display:flex;gap:3px}
-.minibar i{width:16px;height:8px;border-radius:2px;background:var(--line)}
+/* ----- Structure : barre latérale + contenu ----- */
+.shell{display:flex;flex-wrap:wrap;min-height:100vh}
+.side{flex:1 1 248px;max-width:264px;min-width:232px;background:var(--surface);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh;overflow:auto}
+.side .logo{padding:0 8px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav .label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 12px 8px}
+.nav button{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:0;border-radius:11px;background:transparent;color:var(--ink);font:500 14px var(--font-body);cursor:pointer;text-align:left;transition:background-color .15s,color .15s}
+.nav button svg{width:19px;height:19px;flex:none;color:var(--muted);transition:color .15s}
+.nav button:hover{background:var(--surface-2)}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav button[aria-current="page"] svg{color:var(--accent)}
+.nav .count{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:700 11px/20px var(--font-body);text-align:center}
+.nav .count.alert{background:var(--warn);color:#fff;animation:pulse 1.6s infinite}
+.sesscard{margin-top:auto;background:var(--accent-soft);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.sesscard .t{font-weight:600;font-size:14px}
+.sesscard code{font:600 13px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink)}
+.bar{height:6px;border-radius:3px;background:color-mix(in srgb,var(--line-strong) 70%,transparent);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .5s var(--ease)}
+.sidefoot{display:flex;gap:8px;align-items:center}
+.sidefoot .btn{flex:1;white-space:nowrap;padding-inline:10px}
+.main{flex:999 1 560px;min-width:0;padding:26px 32px 60px}
+.head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 22px}
+.head .t{flex:1 1 260px}
+.head h1{margin:0;font-size:27px}
+.head p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.head select{width:auto;min-width:240px}
+
+/* ----- Cartes ----- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.card.pad{padding:20px}
+.card h2{margin:0;font-size:17px}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.cardhead .note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:16px;margin:0 0 16px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.two{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.wide{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)}
+@media (max-width:1100px){.wide{grid-template-columns:minmax(0,1fr)}}
+.kpi{padding:18px;display:flex;flex-direction:column;gap:10px;animation:rise .4s var(--ease) both}
+.kpi .top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-weight:500}
+.kpi .ico{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.kpi .ico svg{width:18px;height:18px}
+.kpi .v{font:700 31px/1 var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+
+/* Alertes d'aide */
+.alerts{display:flex;flex-direction:column;gap:8px;margin:0 0 16px}
+.alert{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);color:var(--ink);padding:12px 14px;border-radius:14px;animation:slide .3s var(--ease)}
+.alert .ico{width:32px;height:32px;border-radius:50%;background:var(--warn);color:#fff;display:grid;place-items:center;flex:none;animation:pulse 1.6s infinite}
+.alert .ico svg{width:17px;height:17px}
+.alert .txt{flex:1;min-width:200px}
+.alert .txt small{display:block;color:var(--muted)}
+
+/* Avancée par module + pilotage */
+.mods{display:flex;flex-direction:column;gap:10px}
+.modrow{display:grid;grid-template-columns:minmax(120px,210px) minmax(0,1fr) 34px;align-items:center;gap:12px;font-size:14px}
+.modrow .n{display:flex;align-items:center;gap:6px;min-width:0}
+.modrow .n .tt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.modrow .n .live{flex:none}
+.modrow .n .live{display:inline-block;padding:0 6px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:10px;font-weight:700;vertical-align:1px}
+.modrow .bar{height:10px;border-radius:5px}
+.modrow .bar>i{border-radius:5px}
+.modrow .c{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.pilotbox{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0 0;padding:12px;border-radius:12px;background:var(--surface-2)}
+.pilotbox select{flex:1 1 200px;width:auto}
+.pilotbox .lbl{font-size:13px;font-weight:600;width:100%}
+
+/* Fil d'activité */
+.feed{display:flex;flex-direction:column}
+.feed .it{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);animation:rise .3s var(--ease) both}
+.feed .it:first-child{border-top:0;padding-top:0}
+.av{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font:600 12.5px var(--font-body)}
+.av.c0{background:var(--accent-soft);color:var(--accent)}.av.c1{background:var(--warn-soft);color:var(--warn)}.av.c2{background:var(--ok-soft);color:var(--ok)}.av.c3{background:var(--surface-2);color:var(--ink)}
+.feed .w{font-size:12.5px;color:var(--muted)}
+
+/* Tableau participants */
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools input[type=search]{width:220px;padding:8px 12px;font-size:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font:500 13px var(--font-body);cursor:pointer;transition:all .15s}
+.chips button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.tablewrap{overflow-x:auto;position:relative}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:680px}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;padding:10px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface-2)}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr{transition:background-color .15s}
+tbody tr:not(.detail):hover{background:var(--surface-2)}
+.who{display:flex;align-items:center;gap:10px}
+.who .n{font-weight:600;white-space:nowrap}
+.who .b{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.minibar{display:flex;gap:3px;align-items:center}
+.minibar i{width:14px;height:8px;border-radius:2px;background:var(--line-strong)}
 .minibar i.d{background:var(--ok)}
 .minibar i.c{background:var(--accent)}
-.detail{background:var(--surface-2);font-size:13.5px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.on{background:var(--ok-soft);color:var(--ok)}
+.pill.help{background:var(--warn-soft);color:var(--warn)}
+.pill.done{background:var(--accent-soft);color:var(--accent)}
+.pill.off{background:var(--surface-2);color:var(--muted)}
+.detail td{background:var(--surface-2);font-size:13.5px}
 .detail dl{display:grid;grid-template-columns:minmax(160px,260px) 1fr;gap:6px 14px;margin:0}
 .detail dt{color:var(--muted)}
 .detail dd{margin:0;white-space:pre-wrap}
-.tablewrap{overflow-x:auto}
-.grid2{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px}
+
+/* Décision */
+.crit{display:flex;flex-direction:column;gap:8px}
+.crit .r{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--surface-2)}
+.crit .mk{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none}
+.crit .mk svg{width:14px;height:14px}
+.crit .mk.ok{background:var(--ok-soft);color:var(--ok)}
+.crit .mk.wait{background:var(--warn-soft);color:var(--warn)}
+.crit .mk.ko{background:var(--danger-soft);color:var(--danger)}
+.crit .l{flex:1}
+.crit .l b{display:block;font-size:14px}
+.crit .l small{color:var(--muted)}
+.crit .v{font:700 18px var(--font-display)}
+.stack{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+
+/* Contenu, sessions, réglages */
+.split{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
 .modlist{list-style:none;margin:0;padding:8px}
-.modlist li{display:flex;align-items:center;gap:6px;padding:4px}
-.modlist li button.pick{flex:1;text-align:left;border:0;background:transparent;font:inherit;color:var(--ink);padding:8px 10px;border-radius:8px;cursor:pointer}
-.modlist li button.pick[aria-current="true"]{background:var(--accent-soft);font-weight:600}
-.editor{padding:18px}
-.editor .two{display:grid;grid-template-columns:1fr 160px;gap:12px}
+.modlist li{display:flex;align-items:center;gap:4px;padding:2px}
+.modlist li button.pick{flex:1;text-align:left;border:0;background:transparent;font:inherit;color:var(--ink);padding:9px 10px;border-radius:10px;cursor:pointer;font-size:14px}
+.modlist li button.pick:hover{background:var(--surface-2)}
+.modlist li button.pick[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.editor{padding:20px}
+.editor .row2{display:grid;grid-template-columns:1fr 160px;gap:12px}
 .field>.mediarow{display:flex;gap:8px;align-items:center;margin:0}
 .mediarow input{flex:1}
 .promptItem{display:flex;gap:8px;margin:0 0 8px}
 .promptItem textarea{min-height:70px}
 .help{font-size:12.5px;color:var(--muted);margin:-8px 0 14px}
-.preview{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}
+.help code{background:var(--surface-2);padding:1px 5px;border-radius:5px}
+.preview{border-top:1px solid var(--line);margin-top:20px;padding-top:20px}
 .preview .module{padding:0;max-width:none}
-.chatpanel{height:560px;display:flex;flex-direction:column;position:static;border:1px solid var(--line);border-radius:var(--radius)}
-.sess{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr 100px auto;gap:10px;align-items:end}
+.preview .module>*{animation:none}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chatpanel{height:min(640px,calc(100vh - 160px));display:flex;flex-direction:column;position:static;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.sess{padding:16px 18px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr 110px auto;gap:12px;align-items:end}
 .sess:last-child{border-bottom:0}
-.linkbox{font-size:13px;word-break:break-all;color:var(--muted);grid-column:1/-1}
-@media (max-width:860px){.grid2{grid-template-columns:1fr}.sess,#newSess{grid-template-columns:1fr!important}.editor .two{grid-template-columns:1fr}.detail dl{grid-template-columns:1fr}}
+.linkbox{font-size:13px;word-break:break-all;color:var(--muted);grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.linkbox strong{color:var(--ink)}
+.checks{list-style:none;padding:0;margin:14px 0 0}
+.checks li{padding:7px 0;border-bottom:1px solid var(--line);animation:rise .3s var(--ease) both}
+.empty-state{padding:28px;text-align:center;color:var(--muted)}
+
+/* Mobile : la barre latérale devient un menu horizontal */
+@media (max-width:860px){
+  .side{max-width:none;flex-basis:100%;height:auto;position:static;padding:14px 16px;gap:12px;border-right:0;border-bottom:1px solid var(--line)}
+  .nav{flex-direction:row;overflow-x:auto;gap:4px}
+  .nav .label,.sesscard{display:none}
+  .nav button{width:auto;white-space:nowrap}
+  .main{padding:20px 16px 48px}
+  .split{grid-template-columns:1fr}
+  .sess,#newSess{grid-template-columns:1fr!important}
+  .editor .row2{grid-template-columns:1fr}
+  .detail dl{grid-template-columns:1fr}
+  .head select{min-width:0;width:100%}
+}
 </style>
 </head>
 <body>
 
 <section class="gate" id="gate" hidden>
-  <form class="card" id="keyForm" style="width:100%;max-width:420px;padding:28px 24px;border-radius:18px">
-    <div class="brand">Néo<b>Pix</b></div>
-    <h1 style="font-size:24px;margin:18px 0 6px">Espace animateur</h1>
-    <p class="muted" style="margin:0 0 20px">Atelier IA : suivi, chat et contenus.</p>
+  <button class="iconbtn corner" type="button" data-theme-toggle aria-label="Changer de thème">
+    <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>
+    <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+  <form class="card" id="keyForm">
+    <span class="logo"><span class="mark" aria-hidden="true">N</span><span class="word"><span class="name">Néo<b>Pix</b></span><span class="tag">digital</span></span></span>
+    <h1>Espace animateur</h1>
+    <p class="lead">Atelier IA : suivi en direct, chat et contenus.</p>
     <label class="field"><span>Clé animateur</span><input type="password" id="key" autocomplete="current-password" required></label>
-    <button class="btn primary" type="submit" style="width:100%">Entrer</button>
+    <button class="btn primary" type="submit" id="keyBtn">Entrer</button>
     <p class="err" id="keyErr" role="alert"></p>
   </form>
 </section>
 
-<div id="app" hidden>
-  <header class="topbar">
-    <div class="brand">Néo<b>Pix</b></div>
-    <div class="sp"><div class="session">Atelier IA · espace animateur</div></div>
-    <a class="btn sm" href="./" target="_blank" rel="noopener">Voir l'espace participant</a>
-    <button class="btn sm ghost" id="logout">Déconnexion</button>
-  </header>
-
-  <div class="wrap">
-    <div class="tabs" role="tablist">
-      <button role="tab" data-tab="suivi" aria-selected="true">Suivi en direct</button>
-      <button role="tab" data-tab="chat" aria-selected="false">Chat <span class="badge" id="unread" style="position:static;margin-left:4px" hidden></span></button>
-      <button role="tab" data-tab="contenu" aria-selected="false">Contenu</button>
-      <button role="tab" data-tab="sessions" aria-selected="false">Sessions et codes</button>
-      <button role="tab" data-tab="reglages" aria-selected="false">Réglages et vérification</button>
+<div class="shell" id="app" hidden>
+  <aside class="side">
+    <span class="logo"><span class="mark" aria-hidden="true">N</span><span class="word"><span class="name">Néo<b>Pix</b></span><span class="tag">digital</span></span></span>
+    <nav class="nav" aria-label="Navigation principale">
+      <div class="label">Atelier IA</div>
+      <button type="button" data-tab="suivi" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tableau de bord<span class="count alert" id="helpCount" hidden></span></button>
+      <button type="button" data-tab="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Chat<span class="count" id="unread" hidden></span></button>
+      <button type="button" data-tab="contenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM8 7h7M8 11h5"/></svg>Contenu</button>
+      <button type="button" data-tab="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3M17 6l3 3M14 9l2 2"/></svg>Sessions et codes</button>
+      <button type="button" data-tab="reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Réglages</button>
+    </nav>
+    <div class="sesscard" id="sessCard"></div>
+    <div class="sidefoot">
+      <a class="btn sm" href="./" target="_blank" rel="noopener">Espace participant</a>
+      <button class="iconbtn" type="button" data-theme-toggle aria-label="Changer de thème">
+        <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>
+        <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="iconbtn" type="button" id="logout" aria-label="Déconnexion" title="Déconnexion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg></button>
     </div>
+  </aside>
 
-    <div class="toolbar" id="sessionBar">
-      <label class="small muted" for="sessionSel">Session</label>
-      <select id="sessionSel"></select>
-      <span class="small muted" id="refreshInfo"></span>
-    </div>
+  <main class="main">
+    <header class="head">
+      <div class="t"><h1 id="pageTitle">Tableau de bord</h1><p id="pageSub">Mis à jour en direct</p></div>
+      <select id="sessionSel" aria-label="Session affichée"></select>
+    </header>
 
-    <!-- Suivi -->
+    <!-- Tableau de bord -->
     <section data-panel="suivi">
-      <div class="stats" id="stats"></div>
-      <div class="toolbar">
-        <button class="btn sm" type="button" id="exportCsv">Exporter cette session (Excel)</button>
-        <button class="btn sm" type="button" id="exportJson">Sauvegarde complète</button>
-        <span class="small muted">Faites une sauvegarde après chaque atelier.</span>
+      <div class="alerts" id="alerts" aria-live="polite"></div>
+      <div class="grid kpis" id="kpis"></div>
+      <div class="grid two">
+        <div class="card pad">
+          <div class="cardhead"><h2>Avancée par module</h2><span class="note">participants ayant terminé</span></div>
+          <div class="mods" id="modBars"></div>
+          <div class="pilotbox">
+            <span class="lbl">Module affiché à tous les participants</span>
+            <select id="pilotSel" aria-label="Module à afficher à tous"></select>
+            <button class="btn sm primary" type="button" id="pilotSet">Afficher à tous</button>
+            <button class="btn sm" type="button" id="pilotFree">Laisser libre</button>
+          </div>
+        </div>
+        <div class="card pad">
+          <div class="cardhead"><h2>Activité récente</h2><button class="linkbtn small" type="button" data-goto="chat">Ouvrir le chat</button></div>
+          <div class="feed" id="feed"></div>
+        </div>
       </div>
-      <div class="card tablewrap"><table>
-        <thead><tr><th>Participant</th><th>Avancée</th><th>Module en cours</th><th>Activité</th><th>Avis</th><th></th></tr></thead>
-        <tbody id="rows"></tbody>
-      </table></div>
+      <div class="grid wide">
+        <div class="card" style="overflow:hidden;min-width:0">
+          <div class="cardhead" style="padding:18px 20px 0">
+            <h2>Participants</h2>
+            <div class="tools">
+              <input type="search" id="search" placeholder="Rechercher un participant" aria-label="Rechercher un participant">
+              <div class="chips" id="chips" role="group" aria-label="Filtrer">
+                <button type="button" data-f="all" aria-pressed="true">Tous</button>
+                <button type="button" data-f="on" aria-pressed="false">En ligne</button>
+                <button type="button" data-f="help" aria-pressed="false">Aide</button>
+                <button type="button" data-f="fb" aria-pressed="false">Avis reçu</button>
+              </div>
+            </div>
+          </div>
+          <div class="tablewrap"><table>
+            <thead><tr><th>Participant</th><th>Avancée</th><th>Module en cours</th><th>Statut</th><th>Avis</th><th><span class="sr-only">Actions</span></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table></div>
+        </div>
+        <div class="card pad">
+          <div class="cardhead"><h2>L'offre tient-elle ?</h2></div>
+          <p class="small muted" style="margin:-6px 0 12px">Vos seuils de décision, calculés à partir des avis.</p>
+          <div class="crit" id="crit"></div>
+          <div class="stack">
+            <button class="btn" type="button" id="exportCsv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Exporter la session (Excel)</button>
+            <button class="btn" type="button" id="exportJson">Sauvegarde complète</button>
+            <span class="small muted">Faites une sauvegarde après chaque atelier.</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Chat -->
@@ -115,13 +280,13 @@ tr:last-child td{border-bottom:0}
 
     <!-- Contenu -->
     <section data-panel="contenu" hidden>
-      <div class="grid2">
+      <div class="split">
         <div class="card">
           <ul class="modlist" id="modList"></ul>
-          <div style="padding:0 12px 12px"><button class="btn sm" id="addMod" style="width:100%">+ Ajouter un module</button></div>
+          <div style="padding:0 12px 12px"><button class="btn sm" type="button" id="addMod" style="width:100%">+ Ajouter un module</button></div>
         </div>
         <form class="card editor" id="modForm">
-          <div class="two">
+          <div class="row2">
             <label class="field"><span>Titre</span><input type="text" id="fTitle" maxlength="120" required></label>
             <label class="field"><span>Durée</span><input type="text" id="fDuration" maxlength="20" placeholder="15 min"></label>
           </div>
@@ -134,14 +299,14 @@ tr:last-child td{border-bottom:0}
           <label class="field"><span>Vidéo (YouTube, Vimeo ou fichier)</span>
             <span class="mediarow"><input type="url" id="fVideo" placeholder="https://www.youtube.com/watch?v=…">
               <label class="btn sm">Importer<input type="file" accept="video/mp4,video/webm" id="upVideo" hidden></label></span></label>
-          <p class="help">Une vidéo remplace l'image en haut du module. Conseil : mettez vos vidéos sur YouTube en « non répertoriée », c'est gratuit et plus fluide. Import direct : 50 Mo maximum.</p>
+          <p class="help">Une vidéo remplace l'image en haut du module. Conseil : mettez vos vidéos sur YouTube en « non répertoriée ». Import direct : 50 Mo maximum.</p>
           <div class="field"><span style="display:block;font-weight:600;font-size:13.5px;margin-bottom:6px">Modèles de demandes à copier</span>
             <div id="fPrompts"></div><button class="btn sm" type="button" id="addPrompt">+ Ajouter un modèle</button></div>
           <label class="field"><span>Type</span><select id="fKind"><option value="lesson">Module classique</option><option value="feedback">Questionnaire de retour</option></select></label>
           <div class="toolbar" style="margin:8px 0 0">
             <button class="btn primary" type="submit" id="saveMod">Enregistrer</button>
             <button class="btn danger" type="button" id="delMod">Supprimer le module</button>
-            <span class="small" id="modStatus"></span>
+            <span class="small" id="modStatus" role="status"></span>
           </div>
           <div class="preview"><div class="eyebrow">Aperçu</div><div class="module" id="preview"></div></div>
         </form>
@@ -152,7 +317,7 @@ tr:last-child td{border-bottom:0}
     <section data-panel="sessions" hidden>
       <div class="card" id="sessList"></div>
       <h2 style="font-size:18px;margin:26px 0 10px">Nouvelle session</h2>
-      <form class="card" id="newSess" style="padding:16px;display:grid;grid-template-columns:1fr 1fr 120px auto;gap:10px;align-items:end">
+      <form class="card" id="newSess" style="padding:18px;display:grid;grid-template-columns:1fr 1fr 120px auto;gap:12px;align-items:end">
         <label class="field" style="margin:0"><span>Nom</span><input type="text" id="nsLabel" placeholder="Atelier du 4 décembre" required></label>
         <label class="field" style="margin:0"><span>Code d'accès (6 caractères min.)</span><input type="text" id="nsCode" placeholder="IA-DEC-04" required minlength="6" maxlength="40" pattern="[A-Za-z0-9_-]+"></label>
         <label class="field" style="margin:0"><span>Places</span><input type="number" id="nsMax" value="30" min="1" max="500"></label>
@@ -163,376 +328,30 @@ tr:last-child td{border-bottom:0}
 
     <!-- Réglages -->
     <section data-panel="reglages" hidden>
-      <form class="card" id="settingsForm" style="padding:18px;max-width:640px">
-        <h2 style="font-size:18px;margin:0 0 4px">Données personnelles (RGPD)</h2>
-        <p class="small muted" style="margin:0 0 16px">Affiché aux participants dans la page « Vos données ».</p>
-        <label class="field"><span>E-mail de contact pour les demandes des participants</span><input type="text" id="setContact" placeholder="ex. : votre.adresse@exemple.fr" maxlength="120"></label>
-        <label class="field"><span>Durée de conservation (mois)</span><input type="number" id="setRetention" min="1" max="36" value="12" style="max-width:120px"></label>
-        <p class="help" style="margin-top:-6px">Les participants et messages plus anciens sont supprimés automatiquement.</p>
-        <button class="btn primary" type="submit">Enregistrer</button> <span class="small" id="setStatus"></span>
-      </form>
-      <div class="card" style="padding:18px;max-width:640px;margin-top:18px">
-        <h2 style="font-size:18px;margin:0 0 4px">Vérifier la plateforme</h2>
-        <p class="small muted" style="margin:0 0 14px">À lancer après chaque mise en ligne et la veille d'un atelier. Le test rejoue tout le parcours d'un participant, puis efface ses traces.</p>
-        <button class="btn primary" type="button" id="selftest">Lancer la vérification</button>
-        <ul id="selftestRes" style="list-style:none;padding:0;margin:14px 0 0"></ul>
-        <p class="small muted" style="margin:14px 0 0">Version du site : <strong id="appVersion"></strong></p>
+      <div class="grid two" style="align-items:start">
+        <form class="card pad" id="settingsForm">
+          <h2>Données personnelles (RGPD)</h2>
+          <p class="small muted" style="margin:4px 0 16px">Affiché aux participants dans la page « Vos données ».</p>
+          <label class="field"><span>E-mail de contact pour les demandes des participants</span><input type="text" id="setContact" placeholder="ex. : votre.adresse@exemple.fr" maxlength="120"></label>
+          <label class="field"><span>Durée de conservation (mois)</span><input type="number" id="setRetention" min="1" max="36" value="12" style="max-width:120px"></label>
+          <p class="help" style="margin-top:-6px">Les participants et messages plus anciens sont supprimés automatiquement.</p>
+          <button class="btn primary" type="submit">Enregistrer</button> <span class="small" id="setStatus" role="status"></span>
+        </form>
+        <div class="card pad">
+          <h2>Vérifier la plateforme</h2>
+          <p class="small muted" style="margin:4px 0 14px">À lancer après chaque mise en ligne et la veille d'un atelier. Le test rejoue tout le parcours d'un participant, puis efface ses traces.</p>
+          <button class="btn primary" type="button" id="selftest">Lancer la vérification</button>
+          <ul class="checks" id="selftestRes"></ul>
+          <p class="small muted" style="margin:14px 0 0">Version du site : <strong id="appVersion"></strong></p>
+        </div>
       </div>
     </section>
-  </div>
+  </main>
 </div>
 
 <div class="toast" id="toast" hidden role="status"></div>
 
 <script src="shared.js"></script>
-<script>
-(function () {
-  var $ = function (id) { return document.getElementById(id); };
-  var KEY_STORE = "neopix_admin_key";
-  var A = { key: store(KEY_STORE) || "", data: null, session: store("neopix_atelier_session") || "", tab: "suivi",
-            open: {}, editId: null, lastMsg: 0, msgSession: null, unread: 0, timer: null };
-
-  function toast(t) { var el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2600); }
-  function participantURL(code) { return new URL("./?code=" + encodeURIComponent(code), location.href).href.replace("admin.html", ""); }
-
-  /* ---------- Connexion ---------- */
-  $("keyForm").addEventListener("submit", async function (e) {
-    e.preventDefault(); $("keyErr").textContent = "";
-    A.key = $("key").value.trim();
-    try { await load(); store(KEY_STORE, A.key); start(); } catch (err) { $("keyErr").textContent = err.message; }
-  });
-  $("logout").addEventListener("click", function () { store(KEY_STORE, null); location.reload(); });
-
-  async function load() {
-    A.data = await rpc("atelier_admin_overview", { p_key: A.key });
-    var ids = A.data.sessions.map(function (s) { return s.id; });
-    if (ids.indexOf(A.session) < 0) A.session = ids[0] || "";
-    $("refreshInfo").textContent = "Actualisé à " + new Date().toLocaleTimeString("fr-FR");
-  }
-  function start() {
-    $("gate").hidden = true; $("app").hidden = false;
-    renderAll(); pollChat();
-    clearInterval(A.timer);
-    A.timer = setInterval(async function () {
-      if (document.hidden) return;
-      try { await load(); if (A.tab === "suivi") renderSuivi(); renderSessionSel(); } catch (e) {}
-      pollChat();
-    }, 5000);
-  }
-
-  /* ---------- Onglets ---------- */
-  document.querySelectorAll("[data-tab]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      A.tab = b.dataset.tab;
-      document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
-      document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== A.tab; });
-      $("sessionBar").hidden = A.tab === "contenu" || A.tab === "sessions" || A.tab === "reglages";
-      if (A.tab === "chat") { A.unread = 0; updateBadge(); var box = $("msgs"); box.scrollTop = box.scrollHeight; }
-      renderAll();
-    });
-  });
-
-  function curSession() { return (A.data.sessions || []).find(function (s) { return s.id === A.session; }); }
-  function renderAll() { renderSessionSel(); renderSuivi(); renderModList(); renderSessions(); renderSettings(); }
-
-  function renderSessionSel() {
-    var sel = $("sessionSel"), html = A.data.sessions.map(function (s) {
-      return '<option value="' + s.id + '"' + (s.id === A.session ? " selected" : "") + '>' + esc(s.label) + " · code " + esc(s.code) + (s.active ? "" : " (fermée)") + "</option>";
-    }).join("");
-    if (sel.dataset.h !== html) { sel.innerHTML = html; sel.dataset.h = html; }
-  }
-  $("sessionSel").addEventListener("change", function () {
-    A.session = this.value; store("neopix_atelier_session", A.session);
-    A.lastMsg = 0; $("msgs").innerHTML = '<p class="empty" id="msgsEmpty">Aucun message pour cette session.</p>';
-    renderSuivi(); pollChat();
-  });
-
-  /* ---------- Suivi ---------- */
-  function online(p) { return Date.now() - new Date(p.last_seen).getTime() < 60000; }
-  function renderSuivi() {
-    var s = curSession(), mods = A.data.modules;
-    if (!s) { $("stats").innerHTML = ""; $("rows").innerHTML = '<tr><td colspan="6" class="muted">Créez d\'abord une session dans l\'onglet « Sessions et codes ».</td></tr>'; return; }
-    var ps = s.participants, n = ps.length;
-    var doneCount = function (p) { var d = (p.progress && p.progress.done) || {}; return mods.filter(function (m) { return d[m.id]; }).length; };
-    var fb = ps.filter(function (p) { return p.feedback && p.feedback.note; });
-    var avgNote = fb.length ? (fb.reduce(function (a, p) { return a + (+p.feedback.note || 0); }, 0) / fb.length).toFixed(1) : "–";
-    var pay = fb.filter(function (p) { return p.feedback.prix && p.feedback.prix !== "Rien"; }).length;
-    var suite = fb.filter(function (p) { return p.feedback.suite === "Oui, contactez-moi"; }).length;
-    var avgProg = n ? Math.round(ps.reduce(function (a, p) { return a + doneCount(p); }, 0) / n / (mods.length || 1) * 100) : 0;
-    $("stats").innerHTML = [
-      [n, "participants"], [ps.filter(online).length, "en ligne maintenant"], [avgProg + " %", "avancée moyenne"],
-      [fb.length + "/" + n, "avis reçus"], [avgNote, "note moyenne /10"],
-      [fb.length ? Math.round(pay / fb.length * 100) + " %" : "–", "prêts à payer"], [suite, "demandes de suite"]
-    ].map(function (x) { return '<div class="stat"><div class="v">' + x[0] + '</div><div class="l">' + x[1] + "</div></div>"; }).join("");
-
-    if (!n) { $("rows").innerHTML = '<tr><td colspan="6" class="muted">Personne n\'est encore connecté. Lien à partager : <strong>' + esc(participantURL(s.code)) + "</strong></td></tr>"; return; }
-    var rows = "";
-    ps.forEach(function (p) {
-      var d = (p.progress && p.progress.done) || {};
-      var cur = mods.find(function (m) { return m.id === p.current_module; });
-      var bar = mods.map(function (m) { return '<i class="' + (d[m.id] ? "d" : m.id === p.current_module ? "c" : "") + '" title="' + esc(m.title) + '"></i>'; }).join("");
-      rows += '<tr><td><strong>' + esc(p.name) + "</strong><br><span class=\"muted small\">" + esc(p.business || "—") + "</span></td>" +
-        '<td><div class="minibar">' + bar + '</div><span class="small muted">' + doneCount(p) + "/" + mods.length + "</span></td>" +
-        "<td>" + (cur ? esc(cur.title) : "—") + "</td>" +
-        '<td><span class="dot' + (online(p) ? " on" : "") + '"></span>' + (online(p) ? "En ligne" : timeAgo(p.last_seen)) + "</td>" +
-        "<td>" + (p.feedback && p.feedback.note ? "<strong>" + esc(p.feedback.note) + "/10</strong>" : '<span class="muted">—</span>') + "</td>" +
-        '<td><button class="btn sm" data-toggle="' + p.id + '">' + (A.open[p.id] ? "Masquer" : "Détails") + "</button></td></tr>";
-      if (A.open[p.id]) {
-        var plan = ((p.progress && p.progress.plan) || []).filter(Boolean);
-        var items = [["Plan d'action", plan.length ? plan.map(function (x, i) { return (i + 1) + ". " + x; }).join("\n") : "Pas encore rempli"],
-                     ["Connecté depuis", new Date(p.created_at).toLocaleString("fr-FR")]];
-        FEEDBACK_QUESTIONS.forEach(function (q) { if (q.type !== "consent" && p.feedback && p.feedback[q.id]) items.push([q.label, p.feedback[q.id]]); });
-        if (p.feedback && p.feedback.contact) items.push(["Accord pour être recontacté", p.contact_consent ? "Oui" : "Non"]);
-        rows += '<tr class="detail"><td colspan="6"><dl>' + items.map(function (x) { return "<dt>" + esc(x[0]) + "</dt><dd>" + esc(x[1]) + "</dd>"; }).join("") + "</dl>" +
-          '<button class="btn sm danger" style="margin-top:12px" data-delp="' + p.id + '">Retirer ce participant</button></td></tr>';
-      }
-    });
-    $("rows").innerHTML = rows;
-  }
-  $("rows").addEventListener("click", async function (e) {
-    var t = e.target.closest("[data-toggle]"), d = e.target.closest("[data-delp]");
-    if (t) { A.open[t.dataset.toggle] = !A.open[t.dataset.toggle]; renderSuivi(); }
-    if (d && confirm("Retirer ce participant et ses réponses ? Cette action est définitive.")) {
-      try { await rpc("atelier_admin_participant_delete", { p_key: A.key, p_id: d.dataset.delp }); await load(); renderSuivi(); toast("Participant retiré."); } catch (err) { toast(err.message); }
-    }
-  });
-
-  /* ---------- Chat ---------- */
-  function updateBadge() { var b = $("unread"); b.hidden = !A.unread; b.textContent = A.unread; }
-  async function pollChat() {
-    if (!A.session) return;
-    var sid = A.session;
-    try {
-      var list = await rpc("atelier_chat", { p_token: null, p_key: A.key, p_session: sid, p_after: A.lastMsg });
-      if (sid !== A.session || !list.length) return;
-      var box = $("msgs"), first = A.lastMsg === 0;
-      $("msgsEmpty") && ($("msgsEmpty").hidden = true);
-      list.forEach(function (m) {
-        if (m.id <= A.lastMsg) return; A.lastMsg = m.id;
-        var el = document.createElement("div");
-        el.className = "msg" + (m.is_staff ? " mine" : "");
-        el.innerHTML = '<p class="who">' + (m.is_staff ? "Vous (animateur)" : esc(m.author)) + " · " + hhmm(m.created_at) + '</p><div class="bubble"></div>';
-        el.querySelector(".bubble").textContent = m.body; box.appendChild(el);
-        if (!first && !m.is_staff && A.tab !== "chat") A.unread++;
-      });
-      updateBadge(); box.scrollTop = box.scrollHeight;
-    } catch (e) {}
-  }
-  $("chatForm").addEventListener("submit", async function (e) {
-    e.preventDefault(); var t = $("chatInput").value.trim(); if (!t || !A.session) return;
-    $("chatInput").value = "";
-    try { await rpc("atelier_send", { p_token: null, p_key: A.key, p_session: A.session, p_body: t }); pollChat(); }
-    catch (err) { $("chatInput").value = t; toast(err.message); }
-  });
-  $("chatInput").addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("chatForm").requestSubmit(); } });
-
-  /* ---------- Contenu ---------- */
-  function renderModList() {
-    var mods = A.data.modules;
-    if (!A.editId && mods[0]) { A.editId = mods[0].id; fillForm(mods[0]); }
-    $("modList").innerHTML = mods.map(function (m, i) {
-      return '<li><button class="pick" type="button" data-pick="' + esc(m.id) + '" aria-current="' + (m.id === A.editId) + '">' + (i + 1) + ". " + esc(m.title) + "</button>" +
-        '<button class="btn sm ghost" type="button" data-move="' + i + ':-1" aria-label="Monter"' + (i ? "" : " disabled") + ">↑</button>" +
-        '<button class="btn sm ghost" type="button" data-move="' + i + ':1" aria-label="Descendre"' + (i < mods.length - 1 ? "" : " disabled") + ">↓</button></li>";
-    }).join("");
-  }
-  $("modList").addEventListener("click", async function (e) {
-    var p = e.target.closest("[data-pick]"), mv = e.target.closest("[data-move]");
-    if (p) { var m = A.data.modules.find(function (x) { return x.id === p.dataset.pick; }); A.editId = m.id; fillForm(m); renderModList(); }
-    if (mv) {
-      var parts = mv.dataset.move.split(":"), i = +parts[0], j = i + (+parts[1]), mods = A.data.modules.slice();
-      var tmp = mods[i]; mods[i] = mods[j]; mods[j] = tmp;
-      try {
-        for (var k = 0; k < mods.length; k++) {
-          if (mods[k].position !== (k + 1) * 10) await rpc("atelier_admin_module", { p_key: A.key, p_module: Object.assign({}, mods[k], { position: (k + 1) * 10 }) });
-        }
-        await load(); renderModList();
-      } catch (err) { toast(err.message); }
-    }
-  });
-  $("addMod").addEventListener("click", function () {
-    A.editId = "";
-    fillForm({ id: "", title: "Nouveau module", duration: "10 min", summary: "", body: "## Titre de section\nVotre texte ici.", prompts: [], image_url: "", video_url: "", kind: "lesson",
-               position: ((A.data.modules.length + 1) * 10) });
-    renderModList(); $("fTitle").focus(); $("fTitle").select();
-  });
-
-  function promptRow(v) {
-    var d = document.createElement("div"); d.className = "promptItem";
-    d.innerHTML = '<textarea maxlength="2000" aria-label="Modèle de demande"></textarea><button class="btn sm ghost" type="button" aria-label="Supprimer ce modèle">✕</button>';
-    d.querySelector("textarea").value = v || "";
-    d.querySelector("button").onclick = function () { d.remove(); updatePreview(); };
-    d.querySelector("textarea").addEventListener("input", updatePreview);
-    $("fPrompts").appendChild(d);
-  }
-  $("addPrompt").addEventListener("click", function () { promptRow(""); });
-
-  var editing = null;
-  function fillForm(m) {
-    editing = m;
-    $("fTitle").value = m.title || ""; $("fDuration").value = m.duration || ""; $("fSummary").value = m.summary || "";
-    $("fBody").value = m.body || ""; $("fImage").value = m.image_url || ""; $("fVideo").value = m.video_url || ""; $("fKind").value = m.kind || "lesson";
-    $("fPrompts").innerHTML = ""; (m.prompts || []).forEach(promptRow);
-    $("delMod").hidden = !m.id; $("modStatus").textContent = "";
-    updatePreview();
-  }
-  function formModule() {
-    return { id: editing && editing.id || "", position: editing && editing.position || 100,
-      title: $("fTitle").value.trim(), duration: $("fDuration").value.trim(), summary: $("fSummary").value.trim(), body: $("fBody").value,
-      image_url: $("fImage").value.trim(), video_url: $("fVideo").value.trim(), kind: $("fKind").value,
-      prompts: Array.prototype.map.call($("fPrompts").querySelectorAll("textarea"), function (t) { return t.value.trim(); }).filter(Boolean) };
-  }
-  function updatePreview() {
-    var m = formModule(), idx = Math.max(0, A.data.modules.findIndex(function (x) { return x.id === m.id; }));
-    $("preview").innerHTML = '<h1 style="font-size:26px">' + esc(m.title) + "</h1>" + (m.summary ? '<p class="lead">' + esc(m.summary) + "</p>" : "") +
-      (m.video_url ? videoHTML(m.video_url) : m.image_url ? '<div class="media"><img src="' + esc(m.image_url) + '" alt=""></div>' : '<div class="media">' + defaultArt(idx) + "</div>") +
-      '<div class="body">' + renderBody(m.body).replace('<div data-slot="plan"></div>', '<div class="plan muted small">[Ici : les 3 champs du plan d\'action]</div>') + "</div>" +
-      (m.prompts.length ? '<section class="prompts"><h2>Modèles à copier</h2>' + m.prompts.map(function (p) { return '<div class="prompt"><p>' + esc(p) + "</p></div>"; }).join("") + "</section>" : "") +
-      (m.kind === "feedback" ? '<div class="plan muted small">[Ici : le questionnaire de retour en ' + FEEDBACK_QUESTIONS.length + " questions]</div>" : "");
-  }
-  ["fTitle", "fSummary", "fBody", "fImage", "fVideo", "fKind"].forEach(function (id) { $(id).addEventListener("input", function () { clearTimeout(updatePreview.t); updatePreview.t = setTimeout(updatePreview, 250); }); });
-
-  $("modForm").addEventListener("submit", async function (e) {
-    e.preventDefault(); $("saveMod").disabled = true; $("modStatus").textContent = "Enregistrement…";
-    try {
-      var id = await rpc("atelier_admin_module", { p_key: A.key, p_module: formModule() });
-      await load(); A.editId = id; fillForm(A.data.modules.find(function (m) { return m.id === id; })); renderModList();
-      $("modStatus").textContent = "Enregistré ✓ Les participants le voient au prochain changement de module.";
-    } catch (err) { $("modStatus").textContent = err.message; }
-    $("saveMod").disabled = false;
-  });
-  $("delMod").addEventListener("click", async function () {
-    if (!editing || !editing.id || !confirm("Supprimer définitivement le module « " + editing.title + " » ?")) return;
-    try { await rpc("atelier_admin_module_delete", { p_key: A.key, p_id: editing.id }); await load(); A.editId = null; renderModList(); toast("Module supprimé."); } catch (err) { toast(err.message); }
-  });
-
-  async function upload(file, field) {
-    if (file.size > 50 * 1024 * 1024) { toast("Fichier trop lourd (50 Mo maximum). Pour une vidéo, utilisez YouTube."); return; }
-    $("modStatus").textContent = "Import en cours…";
-    try {
-      var ticket = await rpc("atelier_admin_upload_ticket", { p_key: A.key });
-      var safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+/, "");
-      var path = ticket + "/" + Date.now() + "-" + safe;
-      var r = await fetch(SB_URL + "/storage/v1/object/" + MEDIA_BUCKET + "/" + path, { method: "POST",
-        headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-Type": file.type, "x-upsert": "false" }, body: file });
-      if (!r.ok) throw new Error("Import refusé (" + r.status + "). Vérifiez le format : image ou vidéo MP4/WebM.");
-      $(field).value = SB_URL + "/storage/v1/object/public/" + MEDIA_BUCKET + "/" + path;
-      updatePreview(); $("modStatus").textContent = "Fichier importé. Pensez à enregistrer le module.";
-    } catch (err) { $("modStatus").textContent = err.message; }
-  }
-  $("upImage").addEventListener("change", function () { if (this.files[0]) upload(this.files[0], "fImage"); this.value = ""; });
-  $("upVideo").addEventListener("change", function () { if (this.files[0]) upload(this.files[0], "fVideo"); this.value = ""; });
-
-  /* ---------- Sessions ---------- */
-  function renderSessions() {
-    if (A.tab !== "sessions") return;
-    var list = A.data.sessions;
-    $("sessList").innerHTML = list.length ? list.map(function (s) {
-      return '<form class="sess" data-sid="' + s.id + '">' +
-        '<label class="field" style="margin:0"><span>Nom</span><input type="text" name="label" value="' + esc(s.label) + '"></label>' +
-        '<label class="field" style="margin:0"><span>Code d\'accès</span><input type="text" name="code" value="' + esc(s.code) + '"></label>' +
-        '<label class="field" style="margin:0"><span>Places</span><input type="number" name="max" min="1" max="500" value="' + (s.max_participants || 30) + '"></label>' +
-        '<div class="toolbar" style="margin:0"><label class="small"><input type="checkbox" name="active"' + (s.active ? " checked" : "") + "> Ouverte</label>" +
-        '<button class="btn sm primary" type="submit">Enregistrer</button><button class="btn sm danger" type="button" data-dels="' + s.id + '">Supprimer</button></div>' +
-        '<div class="linkbox">Lien participant : <strong>' + esc(participantURL(s.code)) + '</strong> <button class="btn sm" type="button" data-copylink="' + esc(participantURL(s.code)) + '">Copier le lien</button> · ' +
-        s.participants.length + "/" + (s.max_participants || 30) + " participant(s)</div></form>";
-    }).join("") : '<p class="muted" style="padding:16px;margin:0">Aucune session.</p>';
-  }
-  $("sessList").addEventListener("submit", async function (e) {
-    e.preventDefault(); var f = e.target;
-    try {
-      await rpc("atelier_admin_session", { p_key: A.key, p_id: f.dataset.sid, p_label: f.label.value, p_code: f.code.value, p_active: f.active.checked, p_max: +f.max.value || 30 });
-      await load(); renderAll(); toast("Session enregistrée.");
-    } catch (err) { toast(err.message); }
-  });
-  $("sessList").addEventListener("click", async function (e) {
-    var c = e.target.closest("[data-copylink]"), d = e.target.closest("[data-dels]");
-    if (c) navigator.clipboard.writeText(c.dataset.copylink).then(function () { toast("Lien copié."); });
-    if (d && confirm("Supprimer cette session, ses participants, leurs réponses et le chat ? Cette action est définitive.")) {
-      try { await rpc("atelier_admin_session_delete", { p_key: A.key, p_id: d.dataset.dels }); await load(); renderAll(); toast("Session supprimée."); } catch (err) { toast(err.message); }
-    }
-  });
-  $("newSess").addEventListener("submit", async function (e) {
-    e.preventDefault(); $("nsErr").textContent = "";
-    try {
-      A.session = await rpc("atelier_admin_session", { p_key: A.key, p_id: null, p_label: $("nsLabel").value, p_code: $("nsCode").value, p_active: true, p_max: +$("nsMax").value || 30 });
-      store("neopix_atelier_session", A.session); A.lastMsg = 0;
-      $("nsLabel").value = ""; $("nsCode").value = ""; await load(); renderAll(); toast("Session créée.");
-    } catch (err) { $("nsErr").textContent = err.message; }
-  });
-
-  /* ---------- Export et sauvegarde ---------- */
-  function download(name, text, type) {
-    var blob = new Blob([text], { type: type }), a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  }
-  function slug(t) { return String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
-  function today() { return new Date().toISOString().slice(0, 10); }
-  $("exportCsv").addEventListener("click", function () {
-    var s = curSession(); if (!s) return;
-    var mods = A.data.modules;
-    var head = ["Nom", "Entreprise", "Inscription", "Dernière activité", "Modules terminés", "Module en cours", "Usage 1", "Usage 2", "Usage 3"]
-      .concat(FEEDBACK_QUESTIONS.filter(function (q) { return q.type !== "consent"; }).map(function (q) { return q.label; }), ["Accord recontact"]);
-    var rows = s.participants.map(function (p) {
-      var d = (p.progress && p.progress.done) || {}, plan = (p.progress && p.progress.plan) || [], fb = p.feedback || {};
-      var cur = mods.find(function (m) { return m.id === p.current_module; });
-      return [p.name, p.business, new Date(p.created_at).toLocaleString("fr-FR"), new Date(p.last_seen).toLocaleString("fr-FR"),
-        mods.filter(function (m) { return d[m.id]; }).length + "/" + mods.length, cur ? cur.title : "", plan[0] || "", plan[1] || "", plan[2] || ""]
-        .concat(FEEDBACK_QUESTIONS.filter(function (q) { return q.type !== "consent"; }).map(function (q) { return fb[q.id] || ""; }), [p.contact_consent ? "Oui" : "Non"]);
-    });
-    var csv = [head].concat(rows).map(function (r) {
-      return r.map(function (c) { c = String(c == null ? "" : c); if (/^[=+\-@]/.test(c)) c = "'" + c; return '"' + c.replace(/"/g, '""') + '"'; }).join(";");
-    }).join("\r\n");
-    download("atelier-" + slug(s.label) + "-" + today() + ".csv", "\ufeff" + csv, "text/csv;charset=utf-8");
-    toast("Export téléchargé : ouvrez-le avec Excel.");
-  });
-  $("exportJson").addEventListener("click", async function () {
-    try {
-      var data = await rpc("atelier_admin_export", { p_key: A.key });
-      download("sauvegarde-atelier-ia-" + today() + ".json", JSON.stringify(data, null, 2), "application/json");
-      toast("Sauvegarde téléchargée. Gardez-la en lieu sûr : elle contient des données personnelles.");
-    } catch (err) { toast(err.message); }
-  });
-
-  /* ---------- Réglages et vérification ---------- */
-  function renderSettings() {
-    if (A.tab !== "reglages") return;
-    var st = A.data.settings || {};
-    if (document.activeElement !== $("setContact")) $("setContact").value = st.contact_email || "";
-    if (document.activeElement !== $("setRetention")) $("setRetention").value = st.retention_months || 12;
-    $("appVersion").textContent = APP_VERSION;
-  }
-  $("settingsForm").addEventListener("submit", async function (e) {
-    e.preventDefault(); $("setStatus").textContent = "Enregistrement…";
-    try {
-      await rpc("atelier_admin_settings", { p_key: A.key, p_contact: $("setContact").value.trim(), p_retention: +$("setRetention").value || 12 });
-      await load(); $("setStatus").textContent = "Enregistré ✓";
-    } catch (err) { $("setStatus").textContent = err.message; }
-  });
-  $("selftest").addEventListener("click", async function () {
-    var b = this, ul = $("selftestRes"); b.disabled = true; ul.innerHTML = '<li class="muted">Vérification en cours…</li>';
-    var steps = [];
-    try {
-      var r = await fetch("shared.js?v=" + Date.now(), { cache: "no-store" });
-      var txt = await r.text(), m = txt.match(/APP_VERSION = "([^"]+)"/);
-      steps.push({ etape: "Fichiers du site à jour (version " + (m ? m[1] : "inconnue") + ")", ok: !!m && m[1] === APP_VERSION });
-      steps = steps.concat(await rpc("atelier_admin_selftest", { p_key: A.key }));
-    } catch (err) { steps.push({ etape: err.message, ok: false }); }
-    var allOk = steps.every(function (s) { return s.ok; });
-    ul.innerHTML = steps.map(function (s) {
-      return '<li style="padding:6px 0;border-bottom:1px solid var(--line)"><strong style="color:' + (s.ok ? "var(--ok)" : "var(--danger)") + '">' + (s.ok ? "✓" : "✕") + "</strong> " + esc(s.etape) + "</li>";
-    }).join("") + '<li style="padding-top:10px;font-weight:600;color:' + (allOk ? "var(--ok)" : "var(--danger)") + '">' +
-      (allOk ? "Tout fonctionne : la plateforme est prête." : "Un problème a été détecté : envoyez une capture de cet écran à Claude.") + "</li>";
-    b.disabled = false;
-  });
-
-  /* ---------- Démarrage ---------- */
-  (async function () {
-    if (!A.key) { $("gate").hidden = false; return; }
-    try { await load(); start(); } catch (err) { $("gate").hidden = false; if (err.code !== "forbidden") $("keyErr").textContent = err.message; }
-  })();
-})();
-</script>
+<script src="admin.js"></script>
 </body>
 </html>

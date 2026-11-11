@@ -2,7 +2,7 @@
 var SB_URL = "https://kpkvskuxvrscfhlckxls.supabase.co";
 var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3Zza3V4dnJzY2ZobGNreGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzNDU4NTgsImV4cCI6MjEwOTkyMTg1OH0.X4UISJ6chZ1zxgfZ_cTyumjbYsnrgq9kdi1ogN439dk";
 var MEDIA_BUCKET = "atelier-media";
-var APP_VERSION = "1.1 · 11/11/2026";
+var APP_VERSION = "1.2 · 11/11/2026";
 
 var ERRORS = {
   code_invalide: "Ce code d'accès n'existe pas ou n'est plus actif.",
@@ -22,6 +22,7 @@ var ERRORS = {
   plafond_invalide: "Le nombre maximum de participants doit être compris entre 1 et 500.",
   duree_invalide: "La durée de conservation doit être comprise entre 1 et 36 mois.",
   email_invalide: "Cette adresse e-mail n'est pas valide.",
+  module_inconnu: "Ce module n'existe plus. Actualisez la page.",
   donnees_invalides: "Enregistrement impossible : données trop volumineuses."
 };
 
