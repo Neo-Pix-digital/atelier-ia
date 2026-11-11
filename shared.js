@@ -2,18 +2,26 @@
 var SB_URL = "https://kpkvskuxvrscfhlckxls.supabase.co";
 var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwa3Zza3V4dnJzY2ZobGNreGxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzNDU4NTgsImV4cCI6MjEwOTkyMTg1OH0.X4UISJ6chZ1zxgfZ_cTyumjbYsnrgq9kdi1ogN439dk";
 var MEDIA_BUCKET = "atelier-media";
+var APP_VERSION = "1.1 · 11/11/2026";
 
 var ERRORS = {
   code_invalide: "Ce code d'accès n'existe pas ou n'est plus actif.",
   nom_invalide: "Indiquez votre prénom et votre nom (2 caractères minimum).",
   acces_refuse: "Votre accès a expiré. Entrez de nouveau le code de l'atelier.",
   session_fermee: "Cette session est fermée. Demandez le nouveau code à l'animateur.",
+  session_complete: "Cette session est complète. Prévenez l'animateur.",
+  trop_de_tentatives: "Trop d'essais avec un code incorrect. Réessayez dans 15 minutes ou demandez le code à l'animateur.",
   trop_de_messages: "Doucement : attendez quelques secondes avant d'envoyer un autre message.",
   message_invalide: "Le message est vide ou trop long (1 000 caractères maximum).",
+  consentement_requis: "Cochez la case d'accord pour que nous puissions vous recontacter, ou laissez le champ de contact vide.",
   forbidden: "Clé animateur incorrecte.",
-  code_trop_court: "Le code doit contenir entre 4 et 40 caractères.",
+  code_trop_court: "Le code doit contenir entre 6 et 40 caractères.",
+  code_caracteres: "Le code ne peut contenir que des lettres sans accent, des chiffres, des tirets et des tirets bas.",
   code_deja_utilise: "Ce code est déjà utilisé par une autre session active.",
   nom_session_vide: "Donnez un nom à la session.",
+  plafond_invalide: "Le nombre maximum de participants doit être compris entre 1 et 500.",
+  duree_invalide: "La durée de conservation doit être comprise entre 1 et 36 mois.",
+  email_invalide: "Cette adresse e-mail n'est pas valide.",
   donnees_invalides: "Enregistrement impossible : données trop volumineuses."
 };
 
@@ -35,7 +43,29 @@ async function rpc(fn, args) {
     err.code = m;
     throw err;
   }
+  if (data && typeof data === "object" && !Array.isArray(data) && data.error) {
+    var e2 = new Error(ERRORS[data.error] || data.error);
+    e2.code = data.error;
+    throw e2;
+  }
   return data;
+}
+
+/* Texte de la page « Vos données » */
+function privacyHTML(p) {
+  var mail = p && p.contact_email ? '<a href="mailto:' + esc(p.contact_email) + '">' + esc(p.contact_email) + "</a>" : "l'animateur de l'atelier";
+  var months = (p && p.retention_months) || 12;
+  return "<h2>Vos données</h2>" +
+    "<p>Cet atelier est organisé par <strong>NéoPix</strong>. Nous collectons uniquement ce qui est nécessaire à son bon déroulement.</p>" +
+    "<h3>Ce que nous enregistrons</h3><ul><li>Votre nom et, si vous l'indiquez, le nom de votre entreprise.</li>" +
+    "<li>Votre avancée dans les modules et votre plan d'action.</li><li>Vos messages dans le chat de l'atelier.</li>" +
+    "<li>Vos réponses au questionnaire et, seulement si vous l'acceptez, votre téléphone ou votre e-mail.</li></ul>" +
+    "<h3>Pourquoi</h3><p>Pour faire fonctionner l'atelier, permettre à l'animateur de vous aider, améliorer la formation et, si vous l'avez demandé, vous recontacter.</p>" +
+    "<h3>Combien de temps</h3><p>" + months + " mois après votre participation, puis suppression automatique.</p>" +
+    "<h3>Où</h3><p>Sur des serveurs situés en France (région de Paris). Vos données ne sont ni vendues, ni partagées.</p>" +
+    "<h3>Vos droits</h3><p>Vous pouvez à tout moment supprimer vous-même vos données depuis l'atelier (lien « Supprimer mes données » dans le sommaire), " +
+    "ou demander leur consultation, leur correction ou leur suppression en écrivant à " + mail + ". " +
+    "Vous pouvez aussi saisir la CNIL (cnil.fr).</p>";
 }
 
 function store(k, v) {
@@ -119,5 +149,6 @@ var FEEDBACK_QUESTIONS = [
   { id: "suite", label: "Souhaitez-vous un accompagnement pour mettre en place l'IA dans votre entreprise ?", type: "choice",
     options: ["Oui, contactez-moi", "Peut-être plus tard", "Non"] },
   { id: "contact", label: "Si oui : votre téléphone ou votre e-mail", type: "line" },
+  { id: "consent", label: "J'accepte que NéoPix utilise ce contact pour me recontacter au sujet de cet atelier.", type: "consent" },
   { id: "recommandation", label: "À quel autre gérant cet atelier pourrait-il servir ?", type: "line" }
 ];

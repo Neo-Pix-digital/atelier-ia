@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Atelier IA · NéoPix</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,6 +20,7 @@
     <label class="field"><span>Votre entreprise <span class="muted">(facultatif)</span></span><input type="text" id="business" autocomplete="organization" maxlength="120"></label>
     <button class="btn primary" type="submit" id="joinBtn">Entrer dans l'atelier</button>
     <p class="err" id="joinErr" role="alert"></p>
+    <p class="legal">Vos informations servent uniquement au déroulement de l'atelier. <button type="button" class="linkbtn" data-privacy>Vos données et vos droits</button></p>
   </form>
 </section>
 
@@ -48,7 +47,8 @@
       <h2>Sommaire</h2>
       <ol id="tocList"></ol>
       <p class="small muted" style="margin:18px 10px 0">Connecté : <strong id="meName"></strong><br>
-        <button class="btn ghost sm" id="logout" style="padding-left:0;justify-content:flex-start;min-height:28px">Changer de participant</button></p>
+        <button class="btn ghost sm" id="logout" style="padding-left:0;justify-content:flex-start;min-height:28px">Changer de participant</button><br>
+        <button type="button" class="linkbtn small" data-privacy>Vos données</button> · <button type="button" class="linkbtn small" id="forgetBtn">Supprimer mes données</button></p>
     </nav>
 
     <main class="module" id="module" tabindex="-1"></main>
@@ -65,6 +65,9 @@
     </aside>
   </div>
 </div>
+
+<dialog class="modal" id="privacy" aria-labelledby="privacyTitle"><div class="inner" id="privacyBody"><p class="muted">Chargement…</p></div>
+  <div class="actions"><button class="btn primary" type="button" id="privacyClose">Fermer</button></div></dialog>
 
 <div class="toast" id="toast" hidden role="status"></div>
 
@@ -231,6 +234,7 @@
         return '<fieldset class="field" style="border:0;padding:0;margin:0 0 16px"><legend style="font-weight:600;font-size:13.5px;margin-bottom:8px">' + esc(q.label) + '</legend><div class="choices">' +
           q.options.map(function (o) { return '<label><input type="radio" name="' + q.id + '" value="' + esc(o) + '"' + (val === o ? " checked" : "") + '>' + esc(o) + '</label>'; }).join("") + '</div></fieldset>';
       }
+      if (q.type === "consent") return '<label class="check"><input type="checkbox" name="' + q.id + '" value="true"' + (val === "true" || val === true ? " checked" : "") + '><span>' + esc(q.label) + '</span></label>';
       if (q.type === "text") return '<label class="field"><span>' + esc(q.label) + '</span><textarea name="' + q.id + '" maxlength="1000">' + esc(val) + '</textarea></label>';
       return '<label class="field"><span>' + esc(q.label) + '</span><input type="text" name="' + q.id + '" maxlength="200" value="' + esc(val) + '"></label>';
     }).join("") + '<button class="btn primary" type="submit" id="fbBtn">Envoyer mon avis</button><p class="err" id="fbErr"></p></form>';
@@ -242,6 +246,9 @@
       var fd = new FormData(f), ans = {};
       FEEDBACK_QUESTIONS.forEach(function (q) { var v = fd.get(q.id); if (v) ans[q.id] = String(v).trim(); });
       if (!ans.note) { $("fbErr").textContent = "Donnez au moins une note de 1 à 10."; return; }
+      ans.consent = ans.consent === "true";
+      if (ans.contact && !ans.consent) { $("fbErr").textContent = ERRORS.consentement_requis; return; }
+      if (!ans.contact) delete ans.consent;
       $("fbBtn").disabled = true;
       try {
         await rpc("atelier_feedback", { p_token: S.token, p_answers: ans });
@@ -304,6 +311,27 @@
   function closeToc() { $("toc").classList.remove("open"); $("tocBtn").setAttribute("aria-expanded", "false"); }
   $("tocBtn").addEventListener("click", function () { var o = $("toc").classList.toggle("open"); $("tocBtn").setAttribute("aria-expanded", o); });
   window.addEventListener("pagehide", function () { if (S.saveTimer) saveNow(); });
+
+  /* ---------- Vos données ---------- */
+  var privacyCache = null;
+  document.addEventListener("click", async function (e) {
+    if (!e.target.closest("[data-privacy]")) return;
+    var d = $("privacy");
+    if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
+    try { privacyCache = privacyCache || await rpc("atelier_privacy", {}); } catch (err) { privacyCache = null; }
+    $("privacyBody").innerHTML = privacyHTML(privacyCache || {});
+    var h = $("privacyBody").querySelector("h2"); if (h) h.id = "privacyTitle";
+  });
+  $("privacyClose").addEventListener("click", function () { var d = $("privacy"); if (d.close) d.close(); else d.removeAttribute("open"); });
+  $("forgetBtn").addEventListener("click", async function () {
+    if (!confirm("Supprimer définitivement votre profil, votre avancée, vos réponses et vos messages ? Cette action est irréversible.")) return;
+    try {
+      await rpc("atelier_forget", { p_token: S.token });
+      store(TOKEN_KEY, null);
+      alert("Vos données ont été supprimées.");
+      location.reload();
+    } catch (err) { toast(err.message); }
+  });
 
   boot();
 })();

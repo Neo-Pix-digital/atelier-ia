@@ -1,4 +1,10 @@
 /* Atelier IA NéoPix — styles communs (participant + animateur) */
+/* Polices hébergées sur le site (aucun appel à Google, conforme RGPD) */
+@font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/inter-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/space-grotesk-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/space-grotesk-latin-700-normal.woff2) format("woff2")}
 :root{
   --bg:#f4f7f9;--surface:#ffffff;--surface-2:#eef3f6;--ink:#14293f;--muted:#5b6b7b;--line:#d5dee6;
   --accent:#00799a;--accent-ink:#ffffff;--accent-soft:#dff1f6;--ok:#1f7a4d;--ok-soft:#e1f3ea;--warn:#a65a00;--warn-soft:#fbeedd;--danger:#b3261e;
@@ -153,3 +159,18 @@ main.module{padding:28px 32px 80px;max-width:780px;width:100%;margin:0 auto}
 /* Toast */
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;
   font-size:14px;z-index:100;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+
+/* Fenêtre « Vos données » */
+dialog.modal{border:1px solid var(--line);border-radius:16px;padding:0;max-width:560px;width:calc(100% - 32px);background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+dialog.modal::backdrop{background:rgba(12,24,36,.55)}
+dialog.modal .inner{padding:22px 22px 18px;max-height:80vh;overflow:auto}
+dialog.modal h2{font-size:20px;margin:0 0 12px}
+dialog.modal h3{font-size:15px;margin:16px 0 4px;font-family:var(--font-body)}
+dialog.modal p,dialog.modal li{font-size:14px}
+dialog.modal .actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 22px;border-top:1px solid var(--line)}
+.legal{font-size:12.5px;color:var(--muted);margin:14px 0 0}
+.linkbtn{border:0;background:none;color:var(--accent);font:inherit;padding:0;text-decoration:underline;cursor:pointer}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin:-6px 0 16px}
+.check input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex:none}
+
+::placeholder{color:var(--muted);opacity:.75}

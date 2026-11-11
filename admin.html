@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Animateur · Atelier IA NéoPix</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
 <link rel="stylesheet" href="style.css">
 <style>
 .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 80px}
@@ -50,10 +48,10 @@ tr:last-child td{border-bottom:0}
 .preview{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}
 .preview .module{padding:0;max-width:none}
 .chatpanel{height:560px;display:flex;flex-direction:column;position:static;border:1px solid var(--line);border-radius:var(--radius)}
-.sess{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+.sess{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr 100px auto;gap:10px;align-items:end}
 .sess:last-child{border-bottom:0}
 .linkbox{font-size:13px;word-break:break-all;color:var(--muted);grid-column:1/-1}
-@media (max-width:860px){.grid2{grid-template-columns:1fr}.sess{grid-template-columns:1fr}.editor .two{grid-template-columns:1fr}.detail dl{grid-template-columns:1fr}}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}.sess,#newSess{grid-template-columns:1fr!important}.editor .two{grid-template-columns:1fr}.detail dl{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -83,6 +81,7 @@ tr:last-child td{border-bottom:0}
       <button role="tab" data-tab="chat" aria-selected="false">Chat <span class="badge" id="unread" style="position:static;margin-left:4px" hidden></span></button>
       <button role="tab" data-tab="contenu" aria-selected="false">Contenu</button>
       <button role="tab" data-tab="sessions" aria-selected="false">Sessions et codes</button>
+      <button role="tab" data-tab="reglages" aria-selected="false">Réglages et vérification</button>
     </div>
 
     <div class="toolbar" id="sessionBar">
@@ -94,6 +93,11 @@ tr:last-child td{border-bottom:0}
     <!-- Suivi -->
     <section data-panel="suivi">
       <div class="stats" id="stats"></div>
+      <div class="toolbar">
+        <button class="btn sm" type="button" id="exportCsv">Exporter cette session (Excel)</button>
+        <button class="btn sm" type="button" id="exportJson">Sauvegarde complète</button>
+        <span class="small muted">Faites une sauvegarde après chaque atelier.</span>
+      </div>
       <div class="card tablewrap"><table>
         <thead><tr><th>Participant</th><th>Avancée</th><th>Module en cours</th><th>Activité</th><th>Avis</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
@@ -148,12 +152,32 @@ tr:last-child td{border-bottom:0}
     <section data-panel="sessions" hidden>
       <div class="card" id="sessList"></div>
       <h2 style="font-size:18px;margin:26px 0 10px">Nouvelle session</h2>
-      <form class="card" id="newSess" style="padding:16px;display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end">
+      <form class="card" id="newSess" style="padding:16px;display:grid;grid-template-columns:1fr 1fr 120px auto;gap:10px;align-items:end">
         <label class="field" style="margin:0"><span>Nom</span><input type="text" id="nsLabel" placeholder="Atelier du 4 décembre" required></label>
-        <label class="field" style="margin:0"><span>Code d'accès</span><input type="text" id="nsCode" placeholder="IA-DEC" required></label>
+        <label class="field" style="margin:0"><span>Code d'accès (6 caractères min.)</span><input type="text" id="nsCode" placeholder="IA-DEC-04" required minlength="6" maxlength="40" pattern="[A-Za-z0-9_-]+"></label>
+        <label class="field" style="margin:0"><span>Places</span><input type="number" id="nsMax" value="30" min="1" max="500"></label>
         <button class="btn primary" type="submit">Créer</button>
         <p class="err" id="nsErr" style="grid-column:1/-1;margin:0"></p>
       </form>
+    </section>
+
+    <!-- Réglages -->
+    <section data-panel="reglages" hidden>
+      <form class="card" id="settingsForm" style="padding:18px;max-width:640px">
+        <h2 style="font-size:18px;margin:0 0 4px">Données personnelles (RGPD)</h2>
+        <p class="small muted" style="margin:0 0 16px">Affiché aux participants dans la page « Vos données ».</p>
+        <label class="field"><span>E-mail de contact pour les demandes des participants</span><input type="text" id="setContact" placeholder="ex. : votre.adresse@exemple.fr" maxlength="120"></label>
+        <label class="field"><span>Durée de conservation (mois)</span><input type="number" id="setRetention" min="1" max="36" value="12" style="max-width:120px"></label>
+        <p class="help" style="margin-top:-6px">Les participants et messages plus anciens sont supprimés automatiquement.</p>
+        <button class="btn primary" type="submit">Enregistrer</button> <span class="small" id="setStatus"></span>
+      </form>
+      <div class="card" style="padding:18px;max-width:640px;margin-top:18px">
+        <h2 style="font-size:18px;margin:0 0 4px">Vérifier la plateforme</h2>
+        <p class="small muted" style="margin:0 0 14px">À lancer après chaque mise en ligne et la veille d'un atelier. Le test rejoue tout le parcours d'un participant, puis efface ses traces.</p>
+        <button class="btn primary" type="button" id="selftest">Lancer la vérification</button>
+        <ul id="selftestRes" style="list-style:none;padding:0;margin:14px 0 0"></ul>
+        <p class="small muted" style="margin:14px 0 0">Version du site : <strong id="appVersion"></strong></p>
+      </div>
     </section>
   </div>
 </div>
@@ -202,14 +226,14 @@ tr:last-child td{border-bottom:0}
       A.tab = b.dataset.tab;
       document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
       document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== A.tab; });
-      $("sessionBar").hidden = A.tab === "contenu" || A.tab === "sessions";
+      $("sessionBar").hidden = A.tab === "contenu" || A.tab === "sessions" || A.tab === "reglages";
       if (A.tab === "chat") { A.unread = 0; updateBadge(); var box = $("msgs"); box.scrollTop = box.scrollHeight; }
       renderAll();
     });
   });
 
   function curSession() { return (A.data.sessions || []).find(function (s) { return s.id === A.session; }); }
-  function renderAll() { renderSessionSel(); renderSuivi(); renderModList(); renderSessions(); }
+  function renderAll() { renderSessionSel(); renderSuivi(); renderModList(); renderSessions(); renderSettings(); }
 
   function renderSessionSel() {
     var sel = $("sessionSel"), html = A.data.sessions.map(function (s) {
@@ -257,7 +281,8 @@ tr:last-child td{border-bottom:0}
         var plan = ((p.progress && p.progress.plan) || []).filter(Boolean);
         var items = [["Plan d'action", plan.length ? plan.map(function (x, i) { return (i + 1) + ". " + x; }).join("\n") : "Pas encore rempli"],
                      ["Connecté depuis", new Date(p.created_at).toLocaleString("fr-FR")]];
-        FEEDBACK_QUESTIONS.forEach(function (q) { if (p.feedback && p.feedback[q.id]) items.push([q.label, p.feedback[q.id]]); });
+        FEEDBACK_QUESTIONS.forEach(function (q) { if (q.type !== "consent" && p.feedback && p.feedback[q.id]) items.push([q.label, p.feedback[q.id]]); });
+        if (p.feedback && p.feedback.contact) items.push(["Accord pour être recontacté", p.contact_consent ? "Oui" : "Non"]);
         rows += '<tr class="detail"><td colspan="6"><dl>' + items.map(function (x) { return "<dt>" + esc(x[0]) + "</dt><dd>" + esc(x[1]) + "</dd>"; }).join("") + "</dl>" +
           '<button class="btn sm danger" style="margin-top:12px" data-delp="' + p.id + '">Retirer ce participant</button></td></tr>';
       }
@@ -406,16 +431,17 @@ tr:last-child td{border-bottom:0}
       return '<form class="sess" data-sid="' + s.id + '">' +
         '<label class="field" style="margin:0"><span>Nom</span><input type="text" name="label" value="' + esc(s.label) + '"></label>' +
         '<label class="field" style="margin:0"><span>Code d\'accès</span><input type="text" name="code" value="' + esc(s.code) + '"></label>' +
+        '<label class="field" style="margin:0"><span>Places</span><input type="number" name="max" min="1" max="500" value="' + (s.max_participants || 30) + '"></label>' +
         '<div class="toolbar" style="margin:0"><label class="small"><input type="checkbox" name="active"' + (s.active ? " checked" : "") + "> Ouverte</label>" +
         '<button class="btn sm primary" type="submit">Enregistrer</button><button class="btn sm danger" type="button" data-dels="' + s.id + '">Supprimer</button></div>' +
         '<div class="linkbox">Lien participant : <strong>' + esc(participantURL(s.code)) + '</strong> <button class="btn sm" type="button" data-copylink="' + esc(participantURL(s.code)) + '">Copier le lien</button> · ' +
-        s.participants.length + " participant(s)</div></form>";
+        s.participants.length + "/" + (s.max_participants || 30) + " participant(s)</div></form>";
     }).join("") : '<p class="muted" style="padding:16px;margin:0">Aucune session.</p>';
   }
   $("sessList").addEventListener("submit", async function (e) {
     e.preventDefault(); var f = e.target;
     try {
-      await rpc("atelier_admin_session", { p_key: A.key, p_id: f.dataset.sid, p_label: f.label.value, p_code: f.code.value, p_active: f.active.checked });
+      await rpc("atelier_admin_session", { p_key: A.key, p_id: f.dataset.sid, p_label: f.label.value, p_code: f.code.value, p_active: f.active.checked, p_max: +f.max.value || 30 });
       await load(); renderAll(); toast("Session enregistrée.");
     } catch (err) { toast(err.message); }
   });
@@ -429,10 +455,76 @@ tr:last-child td{border-bottom:0}
   $("newSess").addEventListener("submit", async function (e) {
     e.preventDefault(); $("nsErr").textContent = "";
     try {
-      A.session = await rpc("atelier_admin_session", { p_key: A.key, p_id: null, p_label: $("nsLabel").value, p_code: $("nsCode").value, p_active: true });
+      A.session = await rpc("atelier_admin_session", { p_key: A.key, p_id: null, p_label: $("nsLabel").value, p_code: $("nsCode").value, p_active: true, p_max: +$("nsMax").value || 30 });
       store("neopix_atelier_session", A.session); A.lastMsg = 0;
       $("nsLabel").value = ""; $("nsCode").value = ""; await load(); renderAll(); toast("Session créée.");
     } catch (err) { $("nsErr").textContent = err.message; }
+  });
+
+  /* ---------- Export et sauvegarde ---------- */
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type }), a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function slug(t) { return String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  function today() { return new Date().toISOString().slice(0, 10); }
+  $("exportCsv").addEventListener("click", function () {
+    var s = curSession(); if (!s) return;
+    var mods = A.data.modules;
+    var head = ["Nom", "Entreprise", "Inscription", "Dernière activité", "Modules terminés", "Module en cours", "Usage 1", "Usage 2", "Usage 3"]
+      .concat(FEEDBACK_QUESTIONS.filter(function (q) { return q.type !== "consent"; }).map(function (q) { return q.label; }), ["Accord recontact"]);
+    var rows = s.participants.map(function (p) {
+      var d = (p.progress && p.progress.done) || {}, plan = (p.progress && p.progress.plan) || [], fb = p.feedback || {};
+      var cur = mods.find(function (m) { return m.id === p.current_module; });
+      return [p.name, p.business, new Date(p.created_at).toLocaleString("fr-FR"), new Date(p.last_seen).toLocaleString("fr-FR"),
+        mods.filter(function (m) { return d[m.id]; }).length + "/" + mods.length, cur ? cur.title : "", plan[0] || "", plan[1] || "", plan[2] || ""]
+        .concat(FEEDBACK_QUESTIONS.filter(function (q) { return q.type !== "consent"; }).map(function (q) { return fb[q.id] || ""; }), [p.contact_consent ? "Oui" : "Non"]);
+    });
+    var csv = [head].concat(rows).map(function (r) {
+      return r.map(function (c) { c = String(c == null ? "" : c); if (/^[=+\-@]/.test(c)) c = "'" + c; return '"' + c.replace(/"/g, '""') + '"'; }).join(";");
+    }).join("\r\n");
+    download("atelier-" + slug(s.label) + "-" + today() + ".csv", "\ufeff" + csv, "text/csv;charset=utf-8");
+    toast("Export téléchargé : ouvrez-le avec Excel.");
+  });
+  $("exportJson").addEventListener("click", async function () {
+    try {
+      var data = await rpc("atelier_admin_export", { p_key: A.key });
+      download("sauvegarde-atelier-ia-" + today() + ".json", JSON.stringify(data, null, 2), "application/json");
+      toast("Sauvegarde téléchargée. Gardez-la en lieu sûr : elle contient des données personnelles.");
+    } catch (err) { toast(err.message); }
+  });
+
+  /* ---------- Réglages et vérification ---------- */
+  function renderSettings() {
+    if (A.tab !== "reglages") return;
+    var st = A.data.settings || {};
+    if (document.activeElement !== $("setContact")) $("setContact").value = st.contact_email || "";
+    if (document.activeElement !== $("setRetention")) $("setRetention").value = st.retention_months || 12;
+    $("appVersion").textContent = APP_VERSION;
+  }
+  $("settingsForm").addEventListener("submit", async function (e) {
+    e.preventDefault(); $("setStatus").textContent = "Enregistrement…";
+    try {
+      await rpc("atelier_admin_settings", { p_key: A.key, p_contact: $("setContact").value.trim(), p_retention: +$("setRetention").value || 12 });
+      await load(); $("setStatus").textContent = "Enregistré ✓";
+    } catch (err) { $("setStatus").textContent = err.message; }
+  });
+  $("selftest").addEventListener("click", async function () {
+    var b = this, ul = $("selftestRes"); b.disabled = true; ul.innerHTML = '<li class="muted">Vérification en cours…</li>';
+    var steps = [];
+    try {
+      var r = await fetch("shared.js?v=" + Date.now(), { cache: "no-store" });
+      var txt = await r.text(), m = txt.match(/APP_VERSION = "([^"]+)"/);
+      steps.push({ etape: "Fichiers du site à jour (version " + (m ? m[1] : "inconnue") + ")", ok: !!m && m[1] === APP_VERSION });
+      steps = steps.concat(await rpc("atelier_admin_selftest", { p_key: A.key }));
+    } catch (err) { steps.push({ etape: err.message, ok: false }); }
+    var allOk = steps.every(function (s) { return s.ok; });
+    ul.innerHTML = steps.map(function (s) {
+      return '<li style="padding:6px 0;border-bottom:1px solid var(--line)"><strong style="color:' + (s.ok ? "var(--ok)" : "var(--danger)") + '">' + (s.ok ? "✓" : "✕") + "</strong> " + esc(s.etape) + "</li>";
+    }).join("") + '<li style="padding-top:10px;font-weight:600;color:' + (allOk ? "var(--ok)" : "var(--danger)") + '">' +
+      (allOk ? "Tout fonctionne : la plateforme est prête." : "Un problème a été détecté : envoyez une capture de cet écran à Claude.") + "</li>";
+    b.disabled = false;
   });
 
   /* ---------- Démarrage ---------- */
